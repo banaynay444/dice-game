@@ -13,6 +13,7 @@
       --step-card-bg: #2d3436;
       --decision-bg: #2c3e50;
       --arena-bg: #181818;
+      --ref-bg: #1a1a1a;
     }
 
     :root[data-theme="light"] {
@@ -24,6 +25,7 @@
       --step-card-bg: #e2e8f0;
       --decision-bg: #ebf8ff;
       --arena-bg: #edf2f7;
+      --ref-bg: #ffffff;
     }
 
     body { 
@@ -34,7 +36,7 @@
       transition: background 0.3s, color 0.3s;
     }
 
-    .container { max-width: 850px; margin: 0 auto; }
+    .container { max-width: 950px; margin: 0 auto; }
     .header-bar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
     .header-right { display: flex; gap: 10px; }
 
@@ -68,8 +70,8 @@
     .seventh { background: #ffffff !important; color: #000 !important; border: 2px solid #ccc !important; }
 
     .board { display: flex; justify-content: space-between; gap: 20px; }
-    .roll-area { flex: 2; }
-    .scoreboard { flex: 1; }
+    .roll-area { flex: 1.4; }
+    .sidebar { flex: 1; max-width: 320px; }
 
     .dice-arena-card {
       background: var(--arena-bg);
@@ -180,11 +182,37 @@
     .status-OUT { background: #e74c3c; color: #fff; }
 
     .decision-card { background: var(--decision-bg); border: 2px solid #3498db; padding: 20px; border-radius: 8px; margin-top: 15px; }
+
+    /* Strategy Card Sidebar Styles */
+    .reference-card {
+      background: #fbc531;
+      border-radius: 12px;
+      padding: 12px;
+      color: #111;
+      margin-top: 20px;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+    }
+    .ref-header { font-weight: 900; text-align: center; font-size: 14px; text-transform: uppercase; margin-bottom: 8px; color: #2d3436; }
+    .ref-header.bust-header { color: #d63031; margin-top: 8px; margin-bottom: 0; }
+    .ref-grid { display: flex; flex-direction: column; gap: 4px; }
+    .ref-row { display: grid; grid-template-columns: repeat(6, 1fr); gap: 4px; }
+    .ref-face { 
+      height: 38px; border-radius: 5px; 
+      display: flex; align-items: center; justify-content: center; 
+      font-weight: 900; font-size: 11px; color: white; 
+      border: 1px solid rgba(0,0,0,0.2);
+    }
+    .ref-face.yellow { color: white !important; }
+    .ref-circle {
+      width: 24px; height: 24px; border-radius: 50%;
+      border: 2px solid #ffffff;
+      display: flex; align-items: center; justify-content: center;
+    }
   </style>
 </head>
 <body>
 
-  <!-- Fullscreen Dramatic Tally-Up Animation Slot -->
+  <!-- Fullscreen Dramatic Tally-Up Animation -->
   <div id="tally-overlay" style="display:none;">
     <h1>⚡ TALLY-UP! ⚡</h1>
     <p id="tally-winner-text">Someone was the fastest!</p>
@@ -296,11 +324,75 @@
 
         </div>
 
-        <!-- Scoreboard -->
-        <div class="scoreboard">
+        <!-- Sidebar: Scoreboard + Strategy Reference Card -->
+        <div class="sidebar">
           <h3>Scoreboard</h3>
           <p><strong>Round Score Pool:</strong> <span id="round-score">0</span></p>
           <ul id="player-list"></ul>
+
+          <!-- Official Dice Reference Card -->
+          <div class="reference-card">
+            <div class="ref-header">3 ★ IS A <span style="color:#00b894;">TALLY UP!</span></div>
+            
+            <div class="ref-grid">
+              <!-- Red -->
+              <div class="ref-row">
+                <div class="ref-face red">★</div>
+                <div class="ref-face red">★</div>
+                <div class="ref-face red">★</div>
+                <div class="ref-face red">50</div>
+                <div class="ref-face red"><div class="ref-circle">50</div></div>
+                <div class="ref-face red">100</div>
+              </div>
+              <!-- Orange -->
+              <div class="ref-row">
+                <div class="ref-face orange">★</div>
+                <div class="ref-face orange">★</div>
+                <div class="ref-face orange">★</div>
+                <div class="ref-face orange">60</div>
+                <div class="ref-face orange"><div class="ref-circle">70</div></div>
+                <div class="ref-face orange">70</div>
+              </div>
+              <!-- Yellow -->
+              <div class="ref-row">
+                <div class="ref-face yellow">★</div>
+                <div class="ref-face yellow">★</div>
+                <div class="ref-face yellow">20</div>
+                <div class="ref-face yellow">20</div>
+                <div class="ref-face yellow"><div class="ref-circle">40</div></div>
+                <div class="ref-face yellow">70</div>
+              </div>
+              <!-- Green -->
+              <div class="ref-row">
+                <div class="ref-face green">★</div>
+                <div class="ref-face green">★</div>
+                <div class="ref-face green">30</div>
+                <div class="ref-face green"><div class="ref-circle">40</div></div>
+                <div class="ref-face green">40</div>
+                <div class="ref-face green">40</div>
+              </div>
+              <!-- Blue -->
+              <div class="ref-row">
+                <div class="ref-face blue">★</div>
+                <div class="ref-face blue"><div class="ref-circle">10</div></div>
+                <div class="ref-face blue"><div class="ref-circle">10</div></div>
+                <div class="ref-face blue">10</div>
+                <div class="ref-face blue">20</div>
+                <div class="ref-face blue">50</div>
+              </div>
+              <!-- Pink -->
+              <div class="ref-row">
+                <div class="ref-face pink">★</div>
+                <div class="ref-face pink"><div class="ref-circle">20</div></div>
+                <div class="ref-face pink"><div class="ref-circle">20</div></div>
+                <div class="ref-face pink">20</div>
+                <div class="ref-face pink">20</div>
+                <div class="ref-face pink">20</div>
+              </div>
+            </div>
+
+            <div class="ref-header bust-header">2 ★ IS A BUST!</div>
+          </div>
         </div>
 
       </div>
@@ -317,16 +409,13 @@
 
     socket.on('connect', () => { myId = socket.id; });
 
-    // Global Key Listener for Spacebar Race!
     window.addEventListener('keydown', (e) => {
       if (e.code === 'Space') {
-        // Prevent default browser scrolling when spacebar is pressed
         e.preventDefault();
         socket.emit('claimTallyUp');
       }
     });
 
-    // Dramatic Fullscreen Tally-Up Overlay Listener
     socket.on('dramaticTallyUp', (data) => {
       const overlay = document.getElementById('tally-overlay');
       const text = document.getElementById('tally-winner-text');
@@ -334,7 +423,6 @@
       text.innerText = `⚡ ${data.winnerName} WAS THE FASTEST! ⚡ (+200 pts banked!)`;
       overlay.style.display = 'flex';
 
-      // Hide overlay after 2.5 seconds
       setTimeout(() => {
         overlay.style.display = 'none';
       }, 2500);
