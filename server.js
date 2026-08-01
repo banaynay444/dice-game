@@ -112,6 +112,7 @@ io.on('connection', (socket) => {
     }
   });
 
+  // FIXED: White Up-Die "x2" now doubles the ENTIRE running round score pool!
   socket.on('rollWhiteDie', () => {
     const player = gameState.players[gameState.currentPlayerIndex];
     if (socket.id !== player.id || gameState.phase !== 'ROLL_WHITE_DIE') return;
@@ -119,22 +120,38 @@ io.on('connection', (socket) => {
     const seventhFace = rollDice('seventh');
     gameState.lastRoll.seventh = seventhFace;
 
-    let baseSum = gameState.lastRoll.results.reduce((acc, r) => acc + parseFace(r.face).val, 0);
+    let currentRollSum = gameState.lastRoll.results.reduce((acc, r) => acc + parseFace(r.face).val, 0);
 
     if (seventhFace === "+100") {
-      baseSum += 100;
-      applyRollPoints(baseSum);
+      applyRollPoints(currentRollSum + 100);
     } else if (seventhFace === "-100") {
-      baseSum -= 100;
-      applyRollPoints(baseSum);
+      applyRollPoints(currentRollSum - 100);
     } else if (seventhFace === "x2") {
-      baseSum *= 2;
-      applyRollPoints(baseSum);
+      // Add current roll points first, then double the entire running total!
+      let totalBeforeDouble = gameState.roundScore + currentRollSum;
+      let doubledTotal = totalBeforeDouble * 2;
+      
+      gameState.roundScore = doubledTotal;
+      gameState.players.forEach(p => {
+        if (p.status === 'IN') {
+          p.roundScore = doubledTotal;
+        }
+      });
+      openDecisionMoment();
     } else if (["+1", "+2"].includes(seventhFace)) {
+      // Add roll points for the circled roll before picking extra dice
+      gameState.roundScore += currentRollSum;
+      gameState.players.forEach(p => {
+        if (p.status === 'IN') p.roundScore += currentRollSum;
+      });
       gameState.pendingExtraDiceCount = parseInt(seventhFace.replace("+", ""), 10);
       gameState.phase = 'EXTRA_DICE_CHOICE';
       io.emit('stateUpdate', gameState);
     } else if (seventhFace === "+3") {
+      gameState.roundScore += currentRollSum;
+      gameState.players.forEach(p => {
+        if (p.status === 'IN') p.roundScore += currentRollSum;
+      });
       gameState.phase = 'ROLL_PLUS_THREE';
       io.emit('stateUpdate', gameState);
     }
@@ -257,8 +274,8 @@ function resolveExtraRolls(extraColors) {
   if (totalStars >= 2) {
     handleBust(`💥 BUST! ${totalStars} stars face up after extra dice!`);
   } else {
-    let totalValue = allResults.reduce((acc, r) => acc + parseFace(r.face).val, 0);
-    applyRollPoints(totalValue);
+    let extraDiceSum = extraResults.reduce((acc, r) => acc + parseFace(r.face).val, 0);
+    applyRollPoints(extraDiceSum);
   }
 }
 
@@ -280,7 +297,6 @@ function openDecisionMoment() {
 }
 
 function handleBust(reason) {
-  // Wipe out unbanked round score for anyone still IN
   gameState.players.forEach(p => {
     if (p.status === 'IN') {
       p.roundScore = 0;
@@ -292,7 +308,6 @@ function handleBust(reason) {
 }
 
 function endRound(reason) {
-  // Consolidate round points into total scores for everyone who didn't bust
   gameState.players.forEach(p => {
     p.totalScore += p.roundScore;
     p.roundScore = 0;
@@ -300,7 +315,6 @@ function endRound(reason) {
     p.madeDecision = false;
   });
 
-  // CHECK FOR WINNERS AT END OF ROUND (Including players who went OUT earlier!)
   const winners = gameState.players.filter(p => p.totalScore >= 2500);
 
   if (winners.length > 0) {
