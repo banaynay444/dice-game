@@ -3,36 +3,36 @@
 <head>
   <meta charset="UTF-8">
   <title>Tally-Up!</title>
-  <!-- Google Font: Nunito (Soft, highly legible & easy on the eyes) -->
+  <!-- Google Font: Nunito (Soft & easy on the eyes) -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@600;800;900&display=swap" rel="stylesheet">
 
   <style>
     :root[data-theme="light"] {
-      --bg-color: #f7f3e9;
+      --bg-color: #fdf6ec;
       --card-bg: #ffffff;
-      --text-color: #2c3e50;
-      --border-color: #2c3e50;
-      --list-bg: #f8f1e5;
-      --step-card-bg: #fce38a;
-      --decision-bg: #e3f2fd;
-      --arena-bg: #f4eee1;
-      --accent-btn: #ff6b81;
-      --confirm-btn: #4158d0;
+      --text-color: #1a1a1a;
+      --border-color: #1a1a1a;
+      --list-bg: #fff0f3;
+      --step-card-bg: #ffeaa7;
+      --decision-bg: #dff9fb;
+      --arena-bg: #f8efe6;
+      --accent-btn: #ff78ae;
+      --confirm-btn: #70a1ff;
     }
 
     :root[data-theme="dark"] {
-      --bg-color: #1a1c23;
-      --card-bg: #242836;
+      --bg-color: #1e1b2e;
+      --card-bg: #2a2438;
       --text-color: #f7f1e3;
-      --border-color: #111318;
-      --list-bg: #2f3545;
-      --step-card-bg: #4a4265;
-      --decision-bg: #2b3a55;
-      --arena-bg: #1d212c;
-      --accent-btn: #ff6b81;
-      --confirm-btn: #546de5;
+      --border-color: #1a1a1a;
+      --list-bg: #352f44;
+      --step-card-bg: #5c5470;
+      --decision-bg: #3d52a0;
+      --arena-bg: #221f3b;
+      --accent-btn: #ff78ae;
+      --confirm-btn: #70a1ff;
     }
 
     body { 
@@ -49,7 +49,7 @@
 
     .card { 
       background: var(--card-bg); 
-      border: 2.5px solid var(--border-color);
+      border: 3px solid var(--border-color);
       border-radius: 18px; padding: 24px; 
       margin-bottom: 20px; 
       box-shadow: 0 6px 0 var(--border-color);
@@ -61,16 +61,16 @@
     
     .risk-category { margin-bottom: 15px; }
     .risk-title { font-size: 13px; font-weight: 800; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 8px; }
-    .risk-high { color: #e74c3c; }
-    .risk-med { color: #d35400; }
-    .risk-low { color: #2980b9; }
+    .risk-high { color: #ff4757; }
+    .risk-med { color: #ffa502; }
+    .risk-low { color: #1e90ff; }
 
     .dice-picker { display: flex; gap: 12px; flex-wrap: wrap; }
     
     /* Selecting Buttons with Clean High Contrast */
     .dice-btn { 
       padding: 10px 24px; 
-      border: 2.5px solid var(--border-color); 
+      border: 3px solid var(--border-color); 
       border-radius: 12px; 
       cursor: pointer; 
       font-weight: 900; 
@@ -82,14 +82,14 @@
     .dice-btn:active { transform: translateY(2px); box-shadow: 0 2px 0 var(--border-color); }
     .dice-btn.selected { border-color: #ffffff; box-shadow: 0 0 0 3.5px var(--border-color); transform: scale(1.06); }
     
-    /* Easy-on-the-eyes High Contrast Dice Palette */
-    .red { background: #ff5252; color: #ffffff; } 
-    .orange { background: #ff793f; color: #111111; } 
-    .yellow { background: #ffda79; color: #111111 !important; }
-    .green { background: #33d9b2; color: #111111; } 
-    .blue { background: #34ace0; color: #ffffff; } 
-    .pink { background: #ff5252; color: #ffffff; }
-    .seventh { background: #ffffff !important; color: #111111 !important; }
+    /* ORIGINAL DICE COLOR PALETTE RESTORED */
+    .red { background: #ff4757; color: #ffffff; } 
+    .orange { background: #ffa502; color: #1a1a1a; } 
+    .yellow { background: #eccc68; color: #1a1a1a !important; }
+    .green { background: #2ed573; color: #1a1a1a; } 
+    .blue { background: #1e90ff; color: #ffffff; } 
+    .pink { background: #ff78ae; color: #ffffff; }
+    .seventh { background: #ffffff !important; color: #1a1a1a !important; }
 
     .board { display: flex; justify-content: space-between; gap: 24px; }
     .roll-area { flex: 1.4; }
@@ -97,7 +97,7 @@
 
     .dice-arena-card {
       background: var(--arena-bg);
-      border: 2.5px solid var(--border-color);
+      border: 3px solid var(--border-color);
       border-radius: 14px;
       padding: 16px;
       margin-top: 20px;
@@ -111,7 +111,7 @@
       border-radius: 12px; 
       display: flex; align-items: center; justify-content: center; 
       font-weight: 900; font-size: 22px; 
-      border: 2.5px solid var(--border-color); 
+      border: 3px solid var(--border-color); 
       box-shadow: 0 4px 0 var(--border-color);
     }
 
@@ -127,19 +127,19 @@
     .circled-inner {
       width: 42px; height: 42px; border-radius: 50%;
       border: 2.5px solid var(--border-color);
-      background: rgba(255,255,255,0.3);
+      background: rgba(255,255,255,0.35);
       display: flex; align-items: center; justify-content: center;
     }
 
     .announcement-banner {
       padding: 12px 18px; border-radius: 12px; font-weight: 900; font-size: 17px; margin-bottom: 15px; text-align: center;
-      border: 2.5px solid var(--border-color); box-shadow: 0 4px 0 var(--border-color);
+      border: 3px solid var(--border-color); box-shadow: 0 4px 0 var(--border-color);
       animation: slideDown 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
     }
     
-    .banner-bust { background: #ff5252; color: white; }
-    .banner-tally { background: #33d9b2; color: #111111; }
-    .banner-win { background: #ffda79; color: #111111; }
+    .banner-bust { background: #ff4757; color: white; }
+    .banner-tally { background: #2ed573; color: #1a1a1a; }
+    .banner-win { background: #ffa502; color: #1a1a1a; }
 
     @keyframes slideDown {
       from { transform: translateY(-20px); opacity: 0; }
@@ -150,13 +150,13 @@
     #tally-overlay {
       position: fixed;
       top: 0; left: 0; width: 100vw; height: 100vh;
-      background: rgba(51, 217, 178, 0.95);
+      background: rgba(46, 213, 115, 0.95);
       z-index: 9999;
       display: flex;
       flex-direction: column;
       align-items: center;
       justify-content: center;
-      color: #111111;
+      color: #1a1a1a;
       text-align: center;
       animation: zoomIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
     }
@@ -171,7 +171,7 @@
 
     .action-step-card {
       background: var(--step-card-bg); 
-      border: 2.5px solid var(--border-color); 
+      border: 3px solid var(--border-color); 
       box-shadow: 0 4px 0 var(--border-color);
       padding: 18px; border-radius: 14px; margin: 15px 0;
     }
@@ -190,9 +190,9 @@
       font-family: 'Nunito', sans-serif;
     }
     .btn:active { transform: translateY(2px); box-shadow: 0 1.5px 0 var(--border-color); }
-    .btn-danger { background: #ff5252; color: white; }
-    .btn-reset { background: #706fd3; font-size: 13px; padding: 7px 14px; }
-    .btn-theme { background: #ff5252; font-size: 13px; padding: 7px 14px; }
+    .btn-danger { background: #ff4757; color: white; }
+    .btn-reset { background: #a55eea; font-size: 13px; padding: 7px 14px; }
+    .btn-theme { background: #ff78ae; font-size: 13px; padding: 7px 14px; }
     .btn:disabled { opacity: 0.4; cursor: not-allowed; box-shadow: none; }
     
     ul { list-style: none; padding: 0; }
@@ -205,28 +205,28 @@
       font-weight: 700;
     }
     .status-badge { font-size: 11px; padding: 3px 8px; border-radius: 6px; font-weight: 800; border: 1.5px solid var(--border-color); }
-    .status-IN { background: #33d9b2; color: #111; } 
-    .status-OUT { background: #ff5252; color: #fff; }
+    .status-IN { background: #2ed573; color: #1a1a1a; } 
+    .status-OUT { background: #ff4757; color: #ffffff; }
 
     .decision-card { 
       background: var(--decision-bg); 
-      border: 2.5px solid var(--border-color); 
+      border: 3px solid var(--border-color); 
       box-shadow: 0 4px 0 var(--border-color);
       padding: 18px; border-radius: 14px; margin-top: 15px; 
     }
 
-    /* Outlined High-Contrast Strategy Legend Card */
+    /* Strategy Card with Soft Pastel Yellow Background */
     .reference-card {
-      background: #ffda79;
-      border: 2.5px solid var(--border-color);
+      background: #fff3a0;
+      border: 3px solid var(--border-color);
       border-radius: 14px;
       padding: 12px;
-      color: #111111;
+      color: #1a1a1a;
       margin-top: 18px;
       box-shadow: 0 5px 0 var(--border-color);
     }
-    .ref-header { font-weight: 900; text-align: center; font-size: 14px; text-transform: uppercase; margin-bottom: 8px; color: #111111; }
-    .ref-header.bust-header { color: #ff5252; margin-top: 8px; margin-bottom: 0; }
+    .ref-header { font-weight: 900; text-align: center; font-size: 14px; text-transform: uppercase; margin-bottom: 8px; color: #1a1a1a; }
+    .ref-header.bust-header { color: #ff4757; margin-top: 8px; margin-bottom: 0; }
     .ref-grid { display: flex; flex-direction: column; gap: 4px; }
     .ref-row { display: grid; grid-template-columns: repeat(6, 1fr); gap: 4px; }
     .ref-face { 
@@ -240,7 +240,7 @@
       width: 22px; height: 22px; border-radius: 50%;
       border: 2px solid var(--border-color);
       display: flex; align-items: center; justify-content: center;
-      background: rgba(255,255,255,0.3);
+      background: rgba(255,255,255,0.35);
     }
   </style>
 </head>
@@ -344,10 +344,10 @@
           </div>
 
           <!-- Step 5: Round Over Transition Button -->
-          <div id="next-round-section" class="action-step-card" style="display:none; background:#706fd3; color:white;">
+          <div id="next-round-section" class="action-step-card" style="display:none; background:#a55eea; color:white;">
             <h3>🛑 Round Ended</h3>
             <p id="next-round-text" style="font-weight:700;">The round has finished. View the scores!</p>
-            <button class="btn" id="start-next-round-btn" onclick="startNextRound()" style="background:#ffffff; color:#111111;">Start Next Round 🎲</button>
+            <button class="btn" id="start-next-round-btn" onclick="startNextRound()" style="background:#ffffff; color:#1a1a1a;">Start Next Round 🎲</button>
           </div>
 
           <!-- PERMANENT FIXED OUTLINED DICE ARENA -->
@@ -358,15 +358,15 @@
 
         </div>
 
-        <!-- Sidebar: Scoreboard + High-Contrast Strategy Reference Card -->
+        <!-- Sidebar: Scoreboard + Strategy Reference Card -->
         <div class="sidebar">
           <h3>Scoreboard</h3>
           <p><strong>Round Score Pool:</strong> <span id="round-score">0</span></p>
           <ul id="player-list"></ul>
 
-          <!-- Official Dice High-Contrast Reference Card -->
+          <!-- Official Dice Reference Card with Pastel Yellow Background -->
           <div class="reference-card">
-            <div class="ref-header">3 ★ IS A <span style="color:#218c74;">TALLY UP!</span></div>
+            <div class="ref-header">3 ★ IS A <span style="color:#2ed573;">TALLY UP!</span></div>
             
             <div class="ref-grid">
               <!-- Red -->
@@ -627,7 +627,7 @@
         li.innerHTML = `
           <span>${p.name} ${p.id === myId ? '(You)' : ''}</span>
           <span>
-            <strong style="color:#2b2b2b;">${p.totalScore + p.roundScore}</strong> 
+            <strong style="color:#1a1a1a;">${p.totalScore + p.roundScore}</strong> 
             <span class="status-badge status-${p.status}">${p.status}${p.status === 'IN' ? decisionTag : ''}</span>
           </span>
         `;
