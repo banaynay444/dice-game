@@ -97,20 +97,15 @@ io.on('connection', (socket) => {
       gameState.tallyClaimed = true;
       const winnerPlayer = gameState.players.find(p => p.id === socket.id);
 
-      // 200 pts to spacebar winner, 100 to everyone else
       gameState.players.forEach(p => {
         const added = (p.id === winnerPlayer.id) ? 200 : 100;
         p.totalScore += added;
       });
 
-      // Trigger dramatic overlay animation on all screens
       io.emit('dramaticTallyUp', {
         winnerName: winnerPlayer ? winnerPlayer.name : 'Someone'
       });
 
-      checkWinCondition();
-      
-      // After dramatic animation pause (2.5s), open Decision Moment
       setTimeout(() => {
         openDecisionMoment();
       }, 2500);
@@ -232,20 +227,17 @@ function startRollSession() {
 
   gameState.lastRoll = { results, seventh: null, extraResults: [] };
 
-  // 1. TALLY-UP RACE: 3 Stars rolled! Wait for SPACEBAR!
   if (stars === 3) {
     gameState.phase = 'TALLY_UP_RACE';
     io.emit('stateUpdate', gameState);
     return;
   }
 
-  // 2. BUST
   if (stars === 2) {
     handleBust("💥 BUST! 2 stars rolled.");
     return;
   }
 
-  // 3. CIRCLED NUMBER
   if (circledFound) {
     gameState.phase = 'ROLL_WHITE_DIE';
     io.emit('stateUpdate', gameState);
@@ -284,7 +276,6 @@ function applyRollPoints(addedPoints) {
 
 function openDecisionMoment() {
   gameState.phase = 'DECISION_MOMENT';
-  checkWinCondition();
   io.emit('stateUpdate', gameState);
 }
 
@@ -300,6 +291,7 @@ function handleBust(reason) {
 }
 
 function endRound(reason) {
+  // Consolidate round points into total scores for everyone
   gameState.players.forEach(p => {
     p.totalScore += p.roundScore;
     p.roundScore = 0;
@@ -307,32 +299,28 @@ function endRound(reason) {
     p.madeDecision = false;
   });
 
-  checkWinCondition();
+  // Check for winners ONLY now that the round is 100% complete!
+  const winners = gameState.players.filter(p => p.totalScore >= 2500);
 
-  if (gameState.phase !== 'GAME_OVER') {
+  if (winners.length > 0) {
+    // Sort highest score first to resolve any ties/showdowns
+    winners.sort((a, b) => b.totalScore - a.totalScore);
+    
+    const winningPlayer = winners[0];
+
+    gameState.winner = {
+      name: winningPlayer.name,
+      totalScore: winningPlayer.totalScore
+    };
+    
+    gameState.phase = 'GAME_OVER';
+  } else {
+    // Rotate turn to next player if no winner yet
     gameState.currentPlayerIndex = (gameState.currentPlayerIndex + 1) % gameState.players.length;
     gameState.phase = 'ROUND_OVER';
   }
 
   io.emit('stateUpdate', gameState);
-}
-
-// FIXED: Calculates actual final total + round score accurately
-function checkWinCondition() {
-  const winners = gameState.players.filter(p => (p.totalScore + p.roundScore) >= 2500);
-  if (winners.length > 0) {
-    winners.sort((a, b) => (b.totalScore + b.roundScore) - (a.totalScore + a.roundScore));
-    
-    const winningPlayer = winners[0];
-    const finalScore = winningPlayer.totalScore + winningPlayer.roundScore;
-
-    gameState.winner = {
-      name: winningPlayer.name,
-      totalScore: finalScore
-    };
-    
-    gameState.phase = 'GAME_OVER';
-  }
 }
 
 const PORT = process.env.PORT || 3000;
