@@ -1,98 +1,125 @@
 <!DOCTYPE html>
-<html lang="en" data-theme="dark">
+<html lang="en" data-theme="light">
 <head>
   <meta charset="UTF-8">
   <title>Tally-Up!</title>
+  <!-- Google Font: Fredoka (Soft, rounded & cute) -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600;700&display=swap" rel="stylesheet">
+
   <style>
-    :root[data-theme="dark"] {
-      --bg-color: #121212;
-      --card-bg: #1e1e1e;
-      --text-color: #ffffff;
-      --border-color: rgba(255,255,255,0.15);
-      --list-bg: #2a2a2a;
-      --step-card-bg: #2d3436;
-      --decision-bg: #2c3e50;
-      --arena-bg: #181818;
-      --ref-bg: #1a1a1a;
+    :root[data-theme="light"] {
+      --bg-color: #fdf6ec;
+      --card-bg: #ffffff;
+      --text-color: #2d3436;
+      --border-color: #1a1a1a;
+      --list-bg: #fff0f3;
+      --step-card-bg: #eccc68;
+      --decision-bg: #dff9fb;
+      --arena-bg: #f8efe6;
+      --accent-btn: #ff6b81;
+      --confirm-btn: #70a1ff;
     }
 
-    :root[data-theme="light"] {
-      --bg-color: #f4f6f8;
-      --card-bg: #ffffff;
-      --text-color: #1a1a1a;
-      --border-color: rgba(0,0,0,0.15);
-      --list-bg: #f0f2f5;
-      --step-card-bg: #e2e8f0;
-      --decision-bg: #ebf8ff;
-      --arena-bg: #edf2f7;
-      --ref-bg: #ffffff;
+    :root[data-theme="dark"] {
+      --bg-color: #1e1b2e;
+      --card-bg: #2a2438;
+      --text-color: #f7f1e3;
+      --border-color: #1a1a1a;
+      --list-bg: #352f44;
+      --step-card-bg: #5c5470;
+      --decision-bg: #3d52a0;
+      --arena-bg: #221f3b;
+      --accent-btn: #ff6b81;
+      --confirm-btn: #70a1ff;
     }
 
     body { 
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
+      font-family: 'Fredoka', cursive, sans-serif; 
       background: var(--bg-color); 
       color: var(--text-color); 
       margin: 0; padding: 20px; 
       transition: background 0.3s, color 0.3s;
     }
 
-    .container { max-width: 950px; margin: 0 auto; }
-    .header-bar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
+    .container { max-width: 980px; margin: 0 auto; }
+    .header-bar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; }
     .header-right { display: flex; gap: 10px; }
 
     .card { 
       background: var(--card-bg); 
-      border-radius: 12px; padding: 24px; 
+      border: 3.5px solid var(--border-color);
+      border-radius: 20px; padding: 24px; 
       margin-bottom: 20px; 
-      box-shadow: 0 4px 20px rgba(0,0,0,0.15); 
+      box-shadow: 0 8px 0 var(--border-color);
       position: relative; 
       transition: background 0.3s;
     }
-    h1, h2, h3 { margin-top: 0; }
+    h1 { font-size: 38px; margin: 0; text-shadow: 2px 2px 0 var(--border-color); }
+    h2, h3 { margin-top: 0; }
     
     .risk-category { margin-bottom: 15px; }
-    .risk-title { font-size: 13px; font-weight: bold; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 6px; }
-    .risk-high { color: #ff7675; }
-    .risk-med { color: #e1b12c; }
-    .risk-low { color: #74b9ff; }
+    .risk-title { font-size: 14px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 8px; }
+    .risk-high { color: #ff4757; }
+    .risk-med { color: #ffa502; }
+    .risk-low { color: #1e90ff; }
 
-    .dice-picker { display: flex; gap: 10px; flex-wrap: wrap; }
-    .dice-btn { padding: 12px 24px; border: 2px solid transparent; border-radius: 8px; cursor: pointer; font-weight: bold; font-size: 20px; color: white; transition: transform 0.1s ease; }
-    .dice-btn:active { transform: scale(0.95); }
-    .dice-btn.selected { border-color: var(--text-color); box-shadow: 0 0 12px var(--text-color); }
+    .dice-picker { display: flex; gap: 12px; flex-wrap: wrap; }
     
-    .red { background: #e74c3c; color: white; } 
-    .orange { background: #e67e22; color: white; } 
-    .yellow { background: #f1c40f; color: white !important; }
-    .green { background: #2ecc71; color: white; } 
-    .blue { background: #3498db; color: white; } 
-    .pink { background: #e84393; color: white; }
-    .seventh { background: #ffffff !important; color: #000 !important; border: 2px solid #ccc !important; }
+    /* Outlined Selecting Buttons */
+    .dice-btn { 
+      padding: 12px 26px; 
+      border: 3.5px solid var(--border-color); 
+      border-radius: 14px; 
+      cursor: pointer; 
+      font-weight: 700; 
+      font-size: 22px; 
+      color: white; 
+      box-shadow: 0 5px 0 var(--border-color);
+      transition: transform 0.1s ease, box-shadow 0.1s ease; 
+      font-family: 'Fredoka', sans-serif;
+    }
+    .dice-btn:active { transform: translateY(3px); box-shadow: 0 2px 0 var(--border-color); }
+    .dice-btn.selected { border-color: #ffffff; box-shadow: 0 0 0 4px var(--border-color); transform: scale(1.08); }
+    
+    /* Colorful Tactile Dice Palette */
+    .red { background: #ff4757; color: white; } 
+    .orange { background: #ffa502; color: white; } 
+    .yellow { background: #eccc68; color: white !important; }
+    .green { background: #2ed573; color: white; } 
+    .blue { background: #1e90ff; color: white; } 
+    .pink { background: #ff78ae; color: white; }
+    .seventh { background: #ffffff !important; color: #1a1a1a !important; }
 
-    .board { display: flex; justify-content: space-between; gap: 20px; }
+    .board { display: flex; justify-content: space-between; gap: 24px; }
     .roll-area { flex: 1.4; }
     .sidebar { flex: 1; max-width: 320px; }
 
+    /* Permanent Outlined Dice Arena */
     .dice-arena-card {
       background: var(--arena-bg);
-      border: 2px dashed var(--border-color);
-      border-radius: 10px;
-      padding: 15px;
+      border: 3px solid var(--border-color);
+      border-radius: 16px;
+      padding: 16px;
       margin-top: 20px;
-      min-height: 80px;
+      min-height: 85px;
+      box-shadow: inset 0 4px 8px rgba(0,0,0,0.08);
     }
 
     .dice-display { display: flex; gap: 15px; align-items: center; flex-wrap: wrap; }
     
+    /* Outlined Rolled Dice */
     .die-face { 
-      width: 65px; height: 65px; border-radius: 10px; 
+      width: 65px; height: 65px; 
+      border-radius: 14px; 
       display: flex; align-items: center; justify-content: center; 
-      font-weight: bold; font-size: 22px; color: white; 
-      border: 2px solid rgba(255,255,255,0.4); 
-      box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+      font-weight: 700; font-size: 24px; color: white; 
+      border: 3.5px solid var(--border-color); 
+      box-shadow: 0 5px 0 var(--border-color);
     }
 
-    .star-symbol { font-size: 28px; color: #fff; }
+    .star-symbol { font-size: 30px; color: #fff; text-shadow: 1.5px 1.5px 0 var(--border-color); }
 
     .rolling { animation: tumble 0.6s ease-in-out infinite alternate; }
     @keyframes tumble {
@@ -101,31 +128,34 @@
       100% { transform: rotate(360deg) scale(1.0); }
     }
 
+    /* Outlined Inner Circles */
     .circled-inner {
       width: 44px; height: 44px; border-radius: 50%;
-      border: 3px solid #ffffff;
+      border: 3px solid var(--border-color);
+      background: rgba(255,255,255,0.25);
       display: flex; align-items: center; justify-content: center;
     }
 
     .announcement-banner {
-      padding: 14px 20px; border-radius: 8px; font-weight: bold; font-size: 16px; margin-bottom: 15px; text-align: center;
+      padding: 14px 20px; border-radius: 14px; font-weight: 700; font-size: 18px; margin-bottom: 15px; text-align: center;
+      border: 3.5px solid var(--border-color); box-shadow: 0 5px 0 var(--border-color);
       animation: slideDown 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
     }
     
-    .banner-bust { background: #d63031; color: white; border: 2px solid #ff7675; }
-    .banner-tally { background: #00b894; color: white; border: 2px solid #55efc4; }
-    .banner-win { background: #fdcb6e; color: #2d3436; border: 2px solid #ffeaa7; }
+    .banner-bust { background: #ff4757; color: white; }
+    .banner-tally { background: #2ed573; color: white; }
+    .banner-win { background: #ffa502; color: white; }
 
     @keyframes slideDown {
       from { transform: translateY(-20px); opacity: 0; }
       to { transform: translateY(0); opacity: 1; }
     }
 
-    /* Dramatic Tally-Up Fullscreen Overlay */
+    /* Dramatic Tally-Up Overlay */
     #tally-overlay {
       position: fixed;
       top: 0; left: 0; width: 100vw; height: 100vh;
-      background: rgba(0, 184, 148, 0.95);
+      background: rgba(46, 213, 115, 0.95);
       z-index: 9999;
       display: flex;
       flex-direction: column;
@@ -137,18 +167,13 @@
     }
 
     #tally-overlay h1 {
-      font-size: 75px;
-      margin: 0;
-      letter-spacing: 4px;
-      text-shadow: 0 4px 15px rgba(0,0,0,0.5);
+      font-size: 80px; margin: 0;
+      letter-spacing: 3px;
+      text-shadow: 4px 4px 0 var(--border-color);
       animation: pulseText 0.6s infinite alternate;
     }
 
-    #tally-overlay p {
-      font-size: 28px;
-      margin-top: 15px;
-      font-weight: bold;
-    }
+    #tally-overlay p { font-size: 28px; margin-top: 15px; font-weight: 700; text-shadow: 2px 2px 0 var(--border-color); }
 
     @keyframes zoomIn {
       from { transform: scale(0.5); opacity: 0; }
@@ -162,51 +187,78 @@
 
     .action-step-card {
       background: var(--step-card-bg); 
-      border: 2px solid #00b894; 
-      padding: 18px; border-radius: 8px; margin: 15px 0;
+      border: 3.5px solid var(--border-color); 
+      box-shadow: 0 5px 0 var(--border-color);
+      padding: 18px; border-radius: 16px; margin: 15px 0;
     }
 
-    .btn { background: #2ecc71; color: white; border: none; padding: 12px 20px; border-radius: 6px; font-size: 16px; font-weight: bold; cursor: pointer; transition: background 0.2s; }
-    .btn:hover { background: #27ae60; }
-    .btn-danger { background: #e74c3c; }
-    .btn-danger:hover { background: #c0392b; }
-    .btn-reset { background: #6c5ce7; font-size: 14px; padding: 8px 14px; }
-    .btn-reset:hover { background: #a29bfe; }
-    .btn-theme { background: #0984e3; font-size: 14px; padding: 8px 14px; }
-    .btn:disabled { opacity: 0.4; cursor: not-allowed; }
+    /* Buttons with Cute Outlines */
+    .btn { 
+      background: var(--confirm-btn); 
+      color: white; 
+      border: 3px solid var(--border-color); 
+      padding: 12px 22px; 
+      border-radius: 12px; 
+      font-size: 16px; 
+      font-weight: 700; 
+      cursor: pointer; 
+      box-shadow: 0 4px 0 var(--border-color);
+      transition: transform 0.1s, box-shadow 0.1s; 
+      font-family: 'Fredoka', sans-serif;
+    }
+    .btn:active { transform: translateY(2px); box-shadow: 0 2px 0 var(--border-color); }
+    .btn-danger { background: #ff4757; }
+    .btn-reset { background: #a55eea; font-size: 14px; padding: 8px 16px; }
+    .btn-theme { background: #ff78ae; font-size: 14px; padding: 8px 16px; }
+    .btn:disabled { opacity: 0.4; cursor: not-allowed; box-shadow: none; }
     
     ul { list-style: none; padding: 0; }
-    li { background: var(--list-bg); padding: 12px; margin-bottom: 8px; border-radius: 6px; display: flex; justify-content: space-between; align-items: center; }
-    .status-badge { font-size: 11px; padding: 3px 8px; border-radius: 4px; font-weight: bold; text-transform: uppercase; }
-    .status-IN { background: #2ecc71; color: #fff; } 
-    .status-OUT { background: #e74c3c; color: #fff; }
+    li { 
+      background: var(--list-bg); 
+      border: 2.5px solid var(--border-color); 
+      padding: 12px; margin-bottom: 8px; 
+      border-radius: 12px; 
+      display: flex; justify-content: space-between; align-items: center; 
+      font-weight: 600;
+    }
+    .status-badge { font-size: 12px; padding: 3px 10px; border-radius: 8px; font-weight: 700; border: 2px solid var(--border-color); }
+    .status-IN { background: #2ed573; color: #fff; } 
+    .status-OUT { background: #ff4757; color: #fff; }
 
-    .decision-card { background: var(--decision-bg); border: 2px solid #3498db; padding: 20px; border-radius: 8px; margin-top: 15px; }
+    .decision-card { 
+      background: var(--decision-bg); 
+      border: 3.5px solid var(--border-color); 
+      box-shadow: 0 5px 0 var(--border-color);
+      padding: 20px; border-radius: 16px; margin-top: 15px; 
+    }
 
-    /* Strategy Card Sidebar Styles */
+    /* Outlined Strategy Legend Card */
     .reference-card {
-      background: #fbc531;
-      border-radius: 12px;
-      padding: 12px;
+      background: #f1c40f;
+      border: 3.5px solid var(--border-color);
+      border-radius: 16px;
+      padding: 14px;
       color: #111;
       margin-top: 20px;
-      box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+      box-shadow: 0 6px 0 var(--border-color);
     }
-    .ref-header { font-weight: 900; text-align: center; font-size: 14px; text-transform: uppercase; margin-bottom: 8px; color: #2d3436; }
-    .ref-header.bust-header { color: #d63031; margin-top: 8px; margin-bottom: 0; }
-    .ref-grid { display: flex; flex-direction: column; gap: 4px; }
-    .ref-row { display: grid; grid-template-columns: repeat(6, 1fr); gap: 4px; }
+    .ref-header { font-weight: 700; text-align: center; font-size: 15px; text-transform: uppercase; margin-bottom: 10px; color: #1a1a1a; }
+    .ref-header.bust-header { color: #d63031; margin-top: 10px; margin-bottom: 0; }
+    .ref-grid { display: flex; flex-direction: column; gap: 5px; }
+    .ref-row { display: grid; grid-template-columns: repeat(6, 1fr); gap: 5px; }
     .ref-face { 
-      height: 38px; border-radius: 5px; 
+      height: 38px; border-radius: 8px; 
       display: flex; align-items: center; justify-content: center; 
-      font-weight: 900; font-size: 11px; color: white; 
-      border: 1px solid rgba(0,0,0,0.2);
+      font-weight: 700; font-size: 12px; color: white; 
+      border: 2.5px solid var(--border-color);
+      box-shadow: 0 2px 0 var(--border-color);
     }
     .ref-face.yellow { color: white !important; }
     .ref-circle {
       width: 24px; height: 24px; border-radius: 50%;
-      border: 2px solid #ffffff;
+      border: 2px solid var(--border-color);
       display: flex; align-items: center; justify-content: center;
+      background: rgba(255,255,255,0.25);
     }
   </style>
 </head>
@@ -223,14 +275,14 @@
       <h1>🎲 Tally-Up!</h1>
       <div class="header-right">
         <button class="btn btn-theme" onclick="toggleTheme()">☀️ / 🌙 Mode</button>
-        <button class="btn btn-reset" onclick="resetGame()">🔄 Start New Game</button>
+        <button class="btn btn-reset" onclick="resetGame()">🔄 New Game</button>
       </div>
     </div>
 
     <div id="join-card" class="card">
-      <h2>Join Game</h2>
-      <input type="text" id="player-name" placeholder="Your Name" style="padding: 10px; width: 200px; border-radius:4px; border:1px solid #ccc;">
-      <button class="btn" onclick="joinGame()">Join</button>
+      <h2>Welcome! Ready to play?</h2>
+      <input type="text" id="player-name" placeholder="Your Name" style="padding: 12px; width: 220px; border-radius:10px; border:3px solid var(--border-color); font-family:'Fredoka', sans-serif; font-size:16px;">
+      <button class="btn" onclick="joinGame()">Join Lobby</button>
     </div>
 
     <div id="game-card" class="card" style="display:none;">
@@ -243,7 +295,7 @@
           
           <!-- Step 1: Dice Pick -->
           <div id="dice-select-section">
-            <p>Select 3 dice to roll for this round:</p>
+            <p style="font-weight:600;">Pick 3 dice for your roll:</p>
             
             <div class="risk-category">
               <div class="risk-title risk-high">🔥 High Risk / High Reward (3 Stars)</div>
@@ -275,13 +327,13 @@
           <!-- Step 2: Trigger White Die -->
           <div id="white-die-section" class="action-step-card" style="display:none;">
             <h3>⭕ Circled Number Rolled!</h3>
-            <p>A circled face appeared on the board! Roll the White Up-Die to modify your score or trigger extra dice.</p>
+            <p>A circled face appeared! Roll the White Up-Die to modify scores or trigger extra dice.</p>
             <button class="btn" onclick="rollWhiteDieAnimated()">Roll White Up-Die 🎲</button>
           </div>
 
           <!-- Step 3A: Extra Dice Pick -->
           <div id="extra-dice-section" class="action-step-card" style="display:none;">
-            <p id="extra-instructions">Select extra dice:</p>
+            <p id="extra-instructions" style="font-weight:600;">Select extra dice:</p>
             <div id="extra-dice-picker"></div>
             <button class="btn" id="confirm-extra-btn" onclick="confirmExtraDice()" disabled style="margin-top:10px;">Roll Chosen Extra Dice 🎲</button>
           </div>
@@ -289,36 +341,36 @@
           <!-- Step 3B: Plus Three Action -->
           <div id="plus-three-section" class="action-step-card" style="display:none;">
             <h3>➕ 3 Extra Dice Triggered!</h3>
-            <p>The White Die landed on +3! You must roll all remaining unchosen dice.</p>
+            <p>The White Die landed on +3! Roll all remaining unchosen dice.</p>
             <button class="btn" onclick="rollPlusThreeAnimated()">Roll All 3 Remaining Dice 🎲</button>
           </div>
 
           <!-- Step 4: Decision Moment -->
           <div id="decision-section" class="decision-card" style="display:none;">
             <h3>⏸️ Decision Moment</h3>
-            <p id="decision-status-text">Choose whether to stay IN for the next roll or go OUT to lock in your points.</p>
+            <p id="decision-status-text" style="font-weight:600;">Stay IN for the next roll or go OUT to lock in your points?</p>
             
             <div id="decision-buttons" style="margin-bottom: 15px;">
               <button class="btn" onclick="makeDecision('IN')">Stay IN</button>
               <button class="btn btn-danger" onclick="makeDecision('OUT')">Go OUT & Bank Points</button>
             </div>
 
-            <div id="roller-controls" style="display:none; border-top: 1px solid var(--border-color); padding-top: 10px;">
+            <div id="roller-controls" style="display:none; border-top: 2.5px solid var(--border-color); padding-top: 12px;">
               <p><em>As the rolling player, press below once everyone has decided:</em></p>
               <button class="btn" id="roll-again-btn" onclick="triggerRollWithAnimation()">Trigger Next Roll 🎲</button>
             </div>
           </div>
 
           <!-- Step 5: Round Over Transition Button -->
-          <div id="next-round-section" class="action-step-card" style="display:none; border-color: #6c5ce7;">
+          <div id="next-round-section" class="action-step-card" style="display:none; background:#a55eea; color:white;">
             <h3>🛑 Round Ended</h3>
-            <p id="next-round-text">The round has finished. Take a moment to view the scores!</p>
-            <button class="btn btn-reset" id="start-next-round-btn" onclick="startNextRound()" style="font-size:16px; padding: 12px 20px;">Start Next Round 🎲</button>
+            <p id="next-round-text">The round has finished. View the scores!</p>
+            <button class="btn" id="start-next-round-btn" onclick="startNextRound()" style="background:#ffffff; color:#1a1a1a;">Start Next Round 🎲</button>
           </div>
 
-          <!-- PERMANENT FIXED DICE ARENA SLOT -->
+          <!-- PERMANENT FIXED OUTLINED DICE ARENA -->
           <div class="dice-arena-card">
-            <div style="font-size:12px; font-weight:bold; opacity:0.6; margin-bottom:8px; text-transform:uppercase;">Dice Arena</div>
+            <div style="font-size:13px; font-weight:700; opacity:0.7; margin-bottom:8px; text-transform:uppercase;">Dice Arena</div>
             <div class="dice-display" id="dice-results"></div>
           </div>
 
@@ -330,9 +382,9 @@
           <p><strong>Round Score Pool:</strong> <span id="round-score">0</span></p>
           <ul id="player-list"></ul>
 
-          <!-- Official Dice Reference Card -->
+          <!-- Official Dice Outlined Reference Card -->
           <div class="reference-card">
-            <div class="ref-header">3 ★ IS A <span style="color:#00b894;">TALLY UP!</span></div>
+            <div class="ref-header">3 ★ IS A <span style="color:#2ed573;">TALLY UP!</span></div>
             
             <div class="ref-grid">
               <!-- Red -->
@@ -593,7 +645,7 @@
         li.innerHTML = `
           <span>${p.name} ${p.id === myId ? '(You)' : ''}</span>
           <span>
-            <strong style="color:#2ecc71;">${p.totalScore + p.roundScore}</strong> 
+            <strong style="color:#2ed573;">${p.totalScore + p.roundScore}</strong> 
             <span class="status-badge status-${p.status}">${p.status}${p.status === 'IN' ? decisionTag : ''}</span>
           </span>
         `;
@@ -639,7 +691,7 @@
 
         if (me && me.status === 'IN' && !me.madeDecision) {
           document.getElementById('decision-buttons').style.display = 'block';
-          document.getElementById('decision-status-text').innerText = "It's decision time! Stay IN or go OUT?";
+          document.getElementById('decision-status-text').innerText = "Stay IN for the next roll or go OUT to lock in your points?";
         } else if (me && me.status === 'OUT') {
           document.getElementById('decision-buttons').style.display = 'none';
           document.getElementById('decision-status-text').innerText = "You are OUT for the rest of this round. Points banked safely.";
@@ -661,7 +713,7 @@
         decisionSec.style.display = 'none';
       }
 
-      // Render Final Rolled Dice into permanent slot
+      // Render Final Rolled Dice
       const display = document.getElementById('dice-results');
       display.innerHTML = '';
 
