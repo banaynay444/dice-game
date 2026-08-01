@@ -280,6 +280,7 @@ function openDecisionMoment() {
 }
 
 function handleBust(reason) {
+  // Wipe out unbanked round score for anyone still IN
   gameState.players.forEach(p => {
     if (p.status === 'IN') {
       p.roundScore = 0;
@@ -291,7 +292,7 @@ function handleBust(reason) {
 }
 
 function endRound(reason) {
-  // Consolidate round points into total scores for everyone
+  // Consolidate round points into total scores for everyone who didn't bust
   gameState.players.forEach(p => {
     p.totalScore += p.roundScore;
     p.roundScore = 0;
@@ -299,11 +300,10 @@ function endRound(reason) {
     p.madeDecision = false;
   });
 
-  // Check for winners ONLY now that the round is 100% complete!
+  // CHECK FOR WINNERS AT END OF ROUND (Including players who went OUT earlier!)
   const winners = gameState.players.filter(p => p.totalScore >= 2500);
 
   if (winners.length > 0) {
-    // Sort highest score first to resolve any ties/showdowns
     winners.sort((a, b) => b.totalScore - a.totalScore);
     
     const winningPlayer = winners[0];
@@ -315,7 +315,6 @@ function endRound(reason) {
     
     gameState.phase = 'GAME_OVER';
   } else {
-    // Rotate turn to next player if no winner yet
     gameState.currentPlayerIndex = (gameState.currentPlayerIndex + 1) % gameState.players.length;
     gameState.phase = 'ROUND_OVER';
   }
