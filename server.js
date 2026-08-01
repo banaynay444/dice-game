@@ -317,11 +317,20 @@ function endRound(reason) {
   io.emit('stateUpdate', gameState);
 }
 
+// FIXED: Calculates actual final total + round score accurately
 function checkWinCondition() {
   const winners = gameState.players.filter(p => (p.totalScore + p.roundScore) >= 2500);
   if (winners.length > 0) {
     winners.sort((a, b) => (b.totalScore + b.roundScore) - (a.totalScore + a.roundScore));
-    gameState.winner = winners[0];
+    
+    const winningPlayer = winners[0];
+    const finalScore = winningPlayer.totalScore + winningPlayer.roundScore;
+
+    gameState.winner = {
+      name: winningPlayer.name,
+      totalScore: finalScore
+    };
+    
     gameState.phase = 'GAME_OVER';
   }
 }
