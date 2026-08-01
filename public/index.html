@@ -1,0 +1,657 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <title>Tally-Up!</title>
+  <style>
+    :root[data-theme="dark"] {
+      --bg-color: #121212;
+      --card-bg: #1e1e1e;
+      --text-color: #ffffff;
+      --border-color: rgba(255,255,255,0.15);
+      --list-bg: #2a2a2a;
+      --step-card-bg: #2d3436;
+      --decision-bg: #2c3e50;
+      --arena-bg: #181818;
+    }
+
+    :root[data-theme="light"] {
+      --bg-color: #f4f6f8;
+      --card-bg: #ffffff;
+      --text-color: #1a1a1a;
+      --border-color: rgba(0,0,0,0.15);
+      --list-bg: #f0f2f5;
+      --step-card-bg: #e2e8f0;
+      --decision-bg: #ebf8ff;
+      --arena-bg: #edf2f7;
+    }
+
+    body { 
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
+      background: var(--bg-color); 
+      color: var(--text-color); 
+      margin: 0; padding: 20px; 
+      transition: background 0.3s, color 0.3s;
+    }
+
+    .container { max-width: 850px; margin: 0 auto; }
+    .header-bar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
+    .header-right { display: flex; gap: 10px; }
+
+    .card { 
+      background: var(--card-bg); 
+      border-radius: 12px; padding: 24px; 
+      margin-bottom: 20px; 
+      box-shadow: 0 4px 20px rgba(0,0,0,0.15); 
+      position: relative; 
+      transition: background 0.3s;
+    }
+    h1, h2, h3 { margin-top: 0; }
+    
+    .risk-category { margin-bottom: 15px; }
+    .risk-title { font-size: 13px; font-weight: bold; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 6px; }
+    .risk-high { color: #ff7675; }
+    .risk-med { color: #e1b12c; }
+    .risk-low { color: #74b9ff; }
+
+    .dice-picker { display: flex; gap: 10px; flex-wrap: wrap; }
+    .dice-btn { padding: 12px 24px; border: 2px solid transparent; border-radius: 8px; cursor: pointer; font-weight: bold; font-size: 20px; color: white; transition: transform 0.1s ease; }
+    .dice-btn:active { transform: scale(0.95); }
+    .dice-btn.selected { border-color: var(--text-color); box-shadow: 0 0 12px var(--text-color); }
+    
+    .red { background: #e74c3c; color: white; } 
+    .orange { background: #e67e22; color: white; } 
+    .yellow { background: #f1c40f; color: white !important; }
+    .green { background: #2ecc71; color: white; } 
+    .blue { background: #3498db; color: white; } 
+    .pink { background: #e84393; color: white; }
+    .seventh { background: #ffffff !important; color: #000 !important; border: 2px solid #ccc !important; }
+
+    .board { display: flex; justify-content: space-between; gap: 20px; }
+    .roll-area { flex: 2; }
+    .scoreboard { flex: 1; }
+
+    .dice-arena-card {
+      background: var(--arena-bg);
+      border: 2px dashed var(--border-color);
+      border-radius: 10px;
+      padding: 15px;
+      margin-top: 20px;
+      min-height: 80px;
+    }
+
+    .dice-display { display: flex; gap: 15px; align-items: center; flex-wrap: wrap; }
+    
+    .die-face { 
+      width: 65px; height: 65px; border-radius: 10px; 
+      display: flex; align-items: center; justify-content: center; 
+      font-weight: bold; font-size: 22px; color: white; 
+      border: 2px solid rgba(255,255,255,0.4); 
+      box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+    }
+
+    .star-symbol { font-size: 28px; color: #fff; }
+
+    .rolling { animation: tumble 0.6s ease-in-out infinite alternate; }
+    @keyframes tumble {
+      0% { transform: rotate(0deg) scale(0.9); }
+      50% { transform: rotate(180deg) scale(1.1); }
+      100% { transform: rotate(360deg) scale(1.0); }
+    }
+
+    .circled-inner {
+      width: 44px; height: 44px; border-radius: 50%;
+      border: 3px solid #ffffff;
+      display: flex; align-items: center; justify-content: center;
+    }
+
+    .announcement-banner {
+      padding: 14px 20px; border-radius: 8px; font-weight: bold; font-size: 16px; margin-bottom: 15px; text-align: center;
+      animation: slideDown 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    }
+    
+    .banner-bust { background: #d63031; color: white; border: 2px solid #ff7675; }
+    .banner-tally { background: #00b894; color: white; border: 2px solid #55efc4; }
+    .banner-win { background: #fdcb6e; color: #2d3436; border: 2px solid #ffeaa7; }
+
+    @keyframes slideDown {
+      from { transform: translateY(-20px); opacity: 0; }
+      to { transform: translateY(0); opacity: 1; }
+    }
+
+    /* Dramatic Tally-Up Fullscreen Overlay */
+    #tally-overlay {
+      position: fixed;
+      top: 0; left: 0; width: 100vw; height: 100vh;
+      background: rgba(0, 184, 148, 0.95);
+      z-index: 9999;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      text-align: center;
+      animation: zoomIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    }
+
+    #tally-overlay h1 {
+      font-size: 75px;
+      margin: 0;
+      letter-spacing: 4px;
+      text-shadow: 0 4px 15px rgba(0,0,0,0.5);
+      animation: pulseText 0.6s infinite alternate;
+    }
+
+    #tally-overlay p {
+      font-size: 28px;
+      margin-top: 15px;
+      font-weight: bold;
+    }
+
+    @keyframes zoomIn {
+      from { transform: scale(0.5); opacity: 0; }
+      to { transform: scale(1); opacity: 1; }
+    }
+
+    @keyframes pulseText {
+      from { transform: scale(1); }
+      to { transform: scale(1.08); }
+    }
+
+    .action-step-card {
+      background: var(--step-card-bg); 
+      border: 2px solid #00b894; 
+      padding: 18px; border-radius: 8px; margin: 15px 0;
+    }
+
+    .btn { background: #2ecc71; color: white; border: none; padding: 12px 20px; border-radius: 6px; font-size: 16px; font-weight: bold; cursor: pointer; transition: background 0.2s; }
+    .btn:hover { background: #27ae60; }
+    .btn-danger { background: #e74c3c; }
+    .btn-danger:hover { background: #c0392b; }
+    .btn-reset { background: #6c5ce7; font-size: 14px; padding: 8px 14px; }
+    .btn-reset:hover { background: #a29bfe; }
+    .btn-theme { background: #0984e3; font-size: 14px; padding: 8px 14px; }
+    .btn:disabled { opacity: 0.4; cursor: not-allowed; }
+    
+    ul { list-style: none; padding: 0; }
+    li { background: var(--list-bg); padding: 12px; margin-bottom: 8px; border-radius: 6px; display: flex; justify-content: space-between; align-items: center; }
+    .status-badge { font-size: 11px; padding: 3px 8px; border-radius: 4px; font-weight: bold; text-transform: uppercase; }
+    .status-IN { background: #2ecc71; color: #fff; } 
+    .status-OUT { background: #e74c3c; color: #fff; }
+
+    .decision-card { background: var(--decision-bg); border: 2px solid #3498db; padding: 20px; border-radius: 8px; margin-top: 15px; }
+  </style>
+</head>
+<body>
+
+  <!-- Fullscreen Dramatic Tally-Up Animation Slot -->
+  <div id="tally-overlay" style="display:none;">
+    <h1>⚡ TALLY-UP! ⚡</h1>
+    <p id="tally-winner-text">Someone was the fastest!</p>
+  </div>
+
+  <div class="container">
+    <div class="header-bar">
+      <h1>🎲 Tally-Up!</h1>
+      <div class="header-right">
+        <button class="btn btn-theme" onclick="toggleTheme()">☀️ / 🌙 Mode</button>
+        <button class="btn btn-reset" onclick="resetGame()">🔄 Start New Game</button>
+      </div>
+    </div>
+
+    <div id="join-card" class="card">
+      <h2>Join Game</h2>
+      <input type="text" id="player-name" placeholder="Your Name" style="padding: 10px; width: 200px; border-radius:4px; border:1px solid #ccc;">
+      <button class="btn" onclick="joinGame()">Join</button>
+    </div>
+
+    <div id="game-card" class="card" style="display:none;">
+      
+      <div id="banner-container"></div>
+
+      <div class="board">
+        <div class="roll-area">
+          <h2 id="turn-indicator">Waiting...</h2>
+          
+          <!-- Step 1: Dice Pick -->
+          <div id="dice-select-section">
+            <p>Select 3 dice to roll for this round:</p>
+            
+            <div class="risk-category">
+              <div class="risk-title risk-high">🔥 High Risk / High Reward (3 Stars)</div>
+              <div class="dice-picker">
+                <button class="dice-btn red" onclick="toggleDice('red')">★</button>
+                <button class="dice-btn orange" onclick="toggleDice('orange')">★</button>
+              </div>
+            </div>
+
+            <div class="risk-category">
+              <div class="risk-title risk-med">⚖️ Medium Risk (2 Stars)</div>
+              <div class="dice-picker">
+                <button class="dice-btn yellow" onclick="toggleDice('yellow')">★</button>
+                <button class="dice-btn green" onclick="toggleDice('green')">★</button>
+              </div>
+            </div>
+
+            <div class="risk-category">
+              <div class="risk-title risk-low">🧊 Low Risk / Chill (1 Star)</div>
+              <div class="dice-picker">
+                <button class="dice-btn blue" onclick="toggleDice('blue')">★</button>
+                <button class="dice-btn pink" onclick="toggleDice('pink')">★</button>
+              </div>
+            </div>
+
+            <button class="btn" id="confirm-dice-btn" onclick="confirmDice()" disabled style="margin-top:10px;">Roll 3 Chosen Dice 🎲</button>
+          </div>
+
+          <!-- Step 2: Trigger White Die -->
+          <div id="white-die-section" class="action-step-card" style="display:none;">
+            <h3>⭕ Circled Number Rolled!</h3>
+            <p>A circled face appeared on the board! Roll the White Up-Die to modify your score or trigger extra dice.</p>
+            <button class="btn" onclick="rollWhiteDieAnimated()">Roll White Up-Die 🎲</button>
+          </div>
+
+          <!-- Step 3A: Extra Dice Pick -->
+          <div id="extra-dice-section" class="action-step-card" style="display:none;">
+            <p id="extra-instructions">Select extra dice:</p>
+            <div id="extra-dice-picker"></div>
+            <button class="btn" id="confirm-extra-btn" onclick="confirmExtraDice()" disabled style="margin-top:10px;">Roll Chosen Extra Dice 🎲</button>
+          </div>
+
+          <!-- Step 3B: Plus Three Action -->
+          <div id="plus-three-section" class="action-step-card" style="display:none;">
+            <h3>➕ 3 Extra Dice Triggered!</h3>
+            <p>The White Die landed on +3! You must roll all remaining unchosen dice.</p>
+            <button class="btn" onclick="rollPlusThreeAnimated()">Roll All 3 Remaining Dice 🎲</button>
+          </div>
+
+          <!-- Step 4: Decision Moment -->
+          <div id="decision-section" class="decision-card" style="display:none;">
+            <h3>⏸️ Decision Moment</h3>
+            <p id="decision-status-text">Choose whether to stay IN for the next roll or go OUT to lock in your points.</p>
+            
+            <div id="decision-buttons" style="margin-bottom: 15px;">
+              <button class="btn" onclick="makeDecision('IN')">Stay IN</button>
+              <button class="btn btn-danger" onclick="makeDecision('OUT')">Go OUT & Bank Points</button>
+            </div>
+
+            <div id="roller-controls" style="display:none; border-top: 1px solid var(--border-color); padding-top: 10px;">
+              <p><em>As the rolling player, press below once everyone has decided:</em></p>
+              <button class="btn" id="roll-again-btn" onclick="triggerRollWithAnimation()">Trigger Next Roll 🎲</button>
+            </div>
+          </div>
+
+          <!-- Step 5: Round Over Transition Button -->
+          <div id="next-round-section" class="action-step-card" style="display:none; border-color: #6c5ce7;">
+            <h3>🛑 Round Ended</h3>
+            <p id="next-round-text">The round has finished. Take a moment to view the scores!</p>
+            <button class="btn btn-reset" id="start-next-round-btn" onclick="startNextRound()" style="font-size:16px; padding: 12px 20px;">Start Next Round 🎲</button>
+          </div>
+
+          <!-- PERMANENT FIXED DICE ARENA SLOT -->
+          <div class="dice-arena-card">
+            <div style="font-size:12px; font-weight:bold; opacity:0.6; margin-bottom:8px; text-transform:uppercase;">Dice Arena</div>
+            <div class="dice-display" id="dice-results"></div>
+          </div>
+
+        </div>
+
+        <!-- Scoreboard -->
+        <div class="scoreboard">
+          <h3>Scoreboard</h3>
+          <p><strong>Round Score Pool:</strong> <span id="round-score">0</span></p>
+          <ul id="player-list"></ul>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <script src="/socket.io/socket.io.js"></script>
+  <script>
+    const socket = io();
+    let myId = null;
+    let selectedColors = [];
+    let extraSelectedColors = [];
+    let isRollingAnimation = false;
+
+    socket.on('connect', () => { myId = socket.id; });
+
+    // Global Key Listener for Spacebar Race!
+    window.addEventListener('keydown', (e) => {
+      if (e.code === 'Space') {
+        // Prevent default browser scrolling when spacebar is pressed
+        e.preventDefault();
+        socket.emit('claimTallyUp');
+      }
+    });
+
+    // Dramatic Fullscreen Tally-Up Overlay Listener
+    socket.on('dramaticTallyUp', (data) => {
+      const overlay = document.getElementById('tally-overlay');
+      const text = document.getElementById('tally-winner-text');
+      
+      text.innerText = `⚡ ${data.winnerName} WAS THE FASTEST! ⚡ (+200 pts banked!)`;
+      overlay.style.display = 'flex';
+
+      // Hide overlay after 2.5 seconds
+      setTimeout(() => {
+        overlay.style.display = 'none';
+      }, 2500);
+    });
+
+    function toggleTheme() {
+      const current = document.documentElement.getAttribute('data-theme');
+      const next = current === 'dark' ? 'light' : 'dark';
+      document.documentElement.setAttribute('data-theme', next);
+    }
+
+    function joinGame() {
+      const name = document.getElementById('player-name').value;
+      if (name) {
+        socket.emit('joinGame', name);
+        document.getElementById('join-card').style.display = 'none';
+        document.getElementById('game-card').style.display = 'block';
+      }
+    }
+
+    function resetGame() {
+      if (confirm("Reset the entire game for all players?")) {
+        socket.emit('resetGame');
+      }
+    }
+
+    function toggleDice(color) {
+      if (selectedColors.includes(color)) {
+        selectedColors = selectedColors.filter(c => c !== color);
+      } else if (selectedColors.length < 3) {
+        selectedColors.push(color);
+      }
+      updateDiceUI();
+    }
+
+    function updateDiceUI() {
+      document.querySelectorAll('#dice-select-section .dice-btn').forEach(btn => {
+        const color = btn.classList[1];
+        if (selectedColors.includes(color)) {
+          btn.classList.add('selected');
+        } else {
+          btn.classList.remove('selected');
+        }
+      });
+      document.getElementById('confirm-dice-btn').disabled = selectedColors.length !== 3;
+    }
+
+    function confirmDice() {
+      animateNewDice(selectedColors, () => socket.emit('selectDice', selectedColors));
+    }
+
+    function rollWhiteDieAnimated() {
+      appendTumblingDie('seventh', () => socket.emit('rollWhiteDie'));
+    }
+
+    function confirmExtraDice() {
+      appendMultipleTumblingDice(extraSelectedColors, () => {
+        socket.emit('selectExtraDice', extraSelectedColors);
+        extraSelectedColors = [];
+      });
+    }
+
+    function rollPlusThreeAnimated() {
+      appendMultipleTumblingDice(['green', 'blue', 'pink'], () => socket.emit('rollPlusThree'));
+    }
+
+    function triggerRollWithAnimation() {
+      animateNewDice(selectedColors, () => socket.emit('rollAgain'));
+    }
+
+    function startNextRound() {
+      socket.emit('startNextRound');
+    }
+
+    function animateNewDice(colorsToAnimate, emitCallback) {
+      isRollingAnimation = true;
+      const display = document.getElementById('dice-results');
+      display.innerHTML = '';
+      
+      colorsToAnimate.forEach(color => {
+        const d = document.createElement('div');
+        d.className = `die-face ${color} rolling`;
+        d.innerText = '?';
+        display.appendChild(d);
+      });
+
+      setTimeout(() => {
+        isRollingAnimation = false;
+        emitCallback();
+      }, 650);
+    }
+
+    function appendTumblingDie(color, emitCallback) {
+      isRollingAnimation = true;
+      const display = document.getElementById('dice-results');
+      
+      const d = document.createElement('div');
+      d.className = `die-face ${color} rolling`;
+      d.innerText = '?';
+      display.appendChild(d);
+
+      setTimeout(() => {
+        isRollingAnimation = false;
+        emitCallback();
+      }, 650);
+    }
+
+    function appendMultipleTumblingDice(colors, emitCallback) {
+      isRollingAnimation = true;
+      const display = document.getElementById('dice-results');
+      
+      colors.forEach(color => {
+        const d = document.createElement('div');
+        d.className = `die-face ${color} rolling`;
+        d.innerText = '?';
+        display.appendChild(d);
+      });
+
+      setTimeout(() => {
+        isRollingAnimation = false;
+        emitCallback();
+      }, 650);
+    }
+
+    function makeDecision(choice) {
+      socket.emit('makeDecision', choice);
+    }
+
+    socket.on('stateUpdate', (state) => {
+      if (isRollingAnimation) return;
+
+      const activePlayer = state.players[state.currentPlayerIndex];
+      const isMyTurn = activePlayer && activePlayer.id === myId;
+      const me = state.players.find(p => p.id === myId);
+
+      document.getElementById('turn-indicator').innerText = activePlayer 
+        ? `${activePlayer.name}'s Turn` 
+        : 'Waiting...';
+
+      document.getElementById('round-score').innerText = state.roundScore;
+
+      // Banner
+      const bannerContainer = document.getElementById('banner-container');
+      bannerContainer.innerHTML = '';
+      if (state.phase === 'TALLY_UP_RACE') {
+        const b = document.createElement('div');
+        b.className = `announcement-banner banner-tally`;
+        b.innerText = `🚨 3 STARS ROLLED! PRESS SPACEBAR FAST TO CLAIM TALLY-UP! 🚨`;
+        bannerContainer.appendChild(b);
+      } else if (state.bannerMessage) {
+        const b = document.createElement('div');
+        b.className = `announcement-banner banner-${state.bannerMessage.type}`;
+        b.innerText = state.bannerMessage.text;
+        bannerContainer.appendChild(b);
+      } else if (state.phase === 'GAME_OVER' && state.winner) {
+        const b = document.createElement('div');
+        b.className = 'announcement-banner banner-win';
+        b.innerText = `🎉 GAME OVER! ${state.winner.name} wins with ${state.winner.totalScore} points!`;
+        bannerContainer.appendChild(b);
+      }
+
+      // Scoreboard
+      const list = document.getElementById('player-list');
+      list.innerHTML = '';
+      state.players.forEach(p => {
+        const li = document.createElement('li');
+        const decisionTag = p.madeDecision ? (p.status === 'OUT' ? ' [BANKED]' : ' [READY]') : ' [THINKING...]';
+        li.innerHTML = `
+          <span>${p.name} ${p.id === myId ? '(You)' : ''}</span>
+          <span>
+            <strong style="color:#2ecc71;">${p.totalScore + p.roundScore}</strong> 
+            <span class="status-badge status-${p.status}">${p.status}${p.status === 'IN' ? decisionTag : ''}</span>
+          </span>
+        `;
+        list.appendChild(li);
+      });
+
+      // Section Visibilities
+      document.getElementById('dice-select-section').style.display = 
+        (state.phase === 'SELECT_DICE' && isMyTurn) ? 'block' : 'none';
+
+      document.getElementById('white-die-section').style.display = 
+        (state.phase === 'ROLL_WHITE_DIE' && isMyTurn) ? 'block' : 'none';
+
+      document.getElementById('plus-three-section').style.display = 
+        (state.phase === 'ROLL_PLUS_THREE' && isMyTurn) ? 'block' : 'none';
+
+      const extraSec = document.getElementById('extra-dice-section');
+      if (state.phase === 'EXTRA_DICE_CHOICE' && isMyTurn) {
+        extraSec.style.display = 'block';
+        document.getElementById('extra-instructions').innerText = `Select ${state.pendingExtraDiceCount} extra dice:`;
+        setupExtraDicePicker(state);
+      } else {
+        extraSec.style.display = 'none';
+      }
+
+      const nextRoundSec = document.getElementById('next-round-section');
+      if (state.phase === 'ROUND_OVER') {
+        nextRoundSec.style.display = 'block';
+        if (isMyTurn) {
+          document.getElementById('next-round-text').innerText = "You are the active player for the new round. Click below when ready!";
+          document.getElementById('start-next-round-btn').style.display = 'inline-block';
+        } else {
+          document.getElementById('next-round-text').innerText = `Waiting for ${activePlayer.name} to start the next round...`;
+          document.getElementById('start-next-round-btn').style.display = 'none';
+        }
+      } else {
+        nextRoundSec.style.display = 'none';
+      }
+
+      const decisionSec = document.getElementById('decision-section');
+      if (state.phase === 'DECISION_MOMENT') {
+        decisionSec.style.display = 'block';
+
+        if (me && me.status === 'IN' && !me.madeDecision) {
+          document.getElementById('decision-buttons').style.display = 'block';
+          document.getElementById('decision-status-text').innerText = "It's decision time! Stay IN or go OUT?";
+        } else if (me && me.status === 'OUT') {
+          document.getElementById('decision-buttons').style.display = 'none';
+          document.getElementById('decision-status-text').innerText = "You are OUT for the rest of this round. Points banked safely.";
+        } else {
+          document.getElementById('decision-buttons').style.display = 'none';
+          document.getElementById('decision-status-text').innerText = "Decision locked! Waiting for the next roll...";
+        }
+
+        const allInDecided = state.players.filter(p => p.status === 'IN').every(p => p.madeDecision);
+        const rollerBox = document.getElementById('roller-controls');
+        if (isMyTurn) {
+          rollerBox.style.display = 'block';
+          document.getElementById('roll-again-btn').disabled = !allInDecided;
+        } else {
+          rollerBox.style.display = 'none';
+        }
+
+      } else {
+        decisionSec.style.display = 'none';
+      }
+
+      // Render Final Rolled Dice into permanent slot
+      const display = document.getElementById('dice-results');
+      display.innerHTML = '';
+
+      if (state.lastRoll) {
+        state.lastRoll.results.forEach(r => renderDie(display, r.color, r.face));
+        if (state.lastRoll.seventh) {
+          renderDie(display, 'seventh', state.lastRoll.seventh);
+        }
+        if (state.lastRoll.extraResults) {
+          state.lastRoll.extraResults.forEach(r => renderDie(display, r.color, r.face));
+        }
+      }
+    });
+
+    function renderDie(container, color, face) {
+      const el = document.createElement('div');
+      const isCircled = typeof face === 'string' && face.endsWith('_CIRCLED');
+      const text = isCircled ? face.replace('_CIRCLED', '') : face;
+
+      el.className = `die-face ${color}`;
+      
+      const content = (text === '★') ? '<span class="star-symbol">★</span>' : text;
+
+      if (isCircled) {
+        const inner = document.createElement('div');
+        inner.className = 'circled-inner';
+        inner.innerHTML = content;
+        el.appendChild(inner);
+      } else {
+        el.innerHTML = content;
+      }
+
+      container.appendChild(el);
+    }
+
+    function setupExtraDicePicker(state) {
+      const picker = document.getElementById('extra-dice-picker');
+      picker.innerHTML = '';
+      const unchosen = ['red', 'orange', 'yellow', 'green', 'blue', 'pink'].filter(c => !state.selectedDice.includes(c));
+
+      const categories = [
+        { title: '🔥 High Risk', colors: ['red', 'orange'], class: 'risk-high' },
+        { title: '⚖️ Medium Risk', colors: ['yellow', 'green'], class: 'risk-med' },
+        { title: '🧊 Low Risk', colors: ['blue', 'pink'], class: 'risk-low' }
+      ];
+
+      categories.forEach(cat => {
+        const availableInCat = cat.colors.filter(c => unchosen.includes(c));
+        if (availableInCat.length > 0) {
+          const catDiv = document.createElement('div');
+          catDiv.className = 'risk-category';
+          catDiv.innerHTML = `<div class="risk-title ${cat.class}">${cat.title}</div>`;
+          
+          const diceGroup = document.createElement('div');
+          diceGroup.className = 'dice-picker';
+
+          availableInCat.forEach(color => {
+            const btn = document.createElement('button');
+            btn.className = `dice-btn ${color}`;
+            btn.innerText = '★';
+            btn.onclick = () => {
+              if (extraSelectedColors.includes(color)) {
+                extraSelectedColors = extraSelectedColors.filter(c => c !== color);
+                btn.classList.remove('selected');
+              } else if (extraSelectedColors.length < state.pendingExtraDiceCount) {
+                extraSelectedColors.push(color);
+                btn.classList.add('selected');
+              }
+              document.getElementById('confirm-extra-btn').disabled = extraSelectedColors.length !== state.pendingExtraDiceCount;
+            };
+            diceGroup.appendChild(btn);
+          });
+
+          catDiv.appendChild(diceGroup);
+          picker.appendChild(catDiv);
+        }
+      });
+    }
+  </script>
+</body>
+</html>
