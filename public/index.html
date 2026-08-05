@@ -144,37 +144,23 @@
       to { transform: translateY(0); opacity: 1; }
     }
 
-    /* Fullscreen Overlays */
-    #tally-overlay, #bust-overlay {
+    /* Fullscreen Tally-Up Overlay */
+    #tally-overlay {
       position: fixed;
       top: 0; left: 0; width: 100vw; height: 100vh;
+      background: rgba(46, 213, 115, 0.96);
+      color: #1a1a1a;
       z-index: 9999;
       display: flex;
       flex-direction: column;
       align-items: center;
       justify-content: center;
       text-align: center;
-      cursor: pointer;
       animation: zoomIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
     }
 
-    #tally-overlay { background: rgba(46, 213, 115, 0.96); color: #1a1a1a; }
-    #bust-overlay { background: rgba(255, 71, 87, 0.96); color: #ffffff; }
-
-    #tally-overlay h1, #bust-overlay h1 { font-size: 75px; margin: 0; letter-spacing: 2px; }
-    #tally-overlay p, #bust-overlay p { font-size: 26px; margin-top: 10px; font-weight: 800; }
-    
-    .press-key-prompt {
-      font-size: 18px !important;
-      margin-top: 30px !important;
-      opacity: 0.9;
-      animation: blinkText 1.2s infinite alternate;
-    }
-
-    @keyframes blinkText {
-      from { opacity: 0.4; }
-      to { opacity: 1; }
-    }
+    #tally-overlay h1 { font-size: 75px; margin: 0; letter-spacing: 2px; }
+    #tally-overlay p { font-size: 26px; margin-top: 10px; font-weight: 800; }
 
     @keyframes zoomIn {
       from { transform: scale(0.5); opacity: 0; }
@@ -257,17 +243,10 @@
 </head>
 <body>
 
-  <!-- Fullscreen Overlays with Manual Keypress Dismissal -->
-  <div id="tally-overlay" style="display:none;" onclick="closeOverlays()">
+  <!-- Automatic Fullscreen Tally-Up Overlay -->
+  <div id="tally-overlay" style="display:none;">
     <h1>⚡ TALLY-UP! ⚡</h1>
     <p id="tally-winner-text">Someone was the fastest!</p>
-    <p class="press-key-prompt">Press any key or click to continue...</p>
-  </div>
-
-  <div id="bust-overlay" style="display:none;" onclick="closeOverlays()">
-    <h1>💥 BUST! 💥</h1>
-    <p id="bust-text">Round Score Lost!</p>
-    <p class="press-key-prompt">Press any key or click to continue...</p>
   </div>
 
   <div class="container">
@@ -465,40 +444,21 @@
 
     socket.on('connect', () => { myId = socket.id; });
 
-    // Handle Spacebar Tally-Up Race OR Dismiss Active Overlays
+    // Global Key Listener for Spacebar Tally-Up Race
     window.addEventListener('keydown', (e) => {
-      const tallyOverlay = document.getElementById('tally-overlay');
-      const bustOverlay = document.getElementById('bust-overlay');
-
-      // If an overlay is currently open, pressing ANY key closes it!
-      if (tallyOverlay.style.display === 'flex' || bustOverlay.style.display === 'flex') {
-        closeOverlays();
-        return;
-      }
-
       if (e.code === 'Space') {
         e.preventDefault();
         socket.emit('claimTallyUp');
       }
     });
 
-    function closeOverlays() {
-      document.getElementById('tally-overlay').style.display = 'none';
-      document.getElementById('bust-overlay').style.display = 'none';
-    }
-
+    // Automatic Tally-Up Overlay Dismissal (2.5s)
     socket.on('dramaticTallyUp', (data) => {
       const overlay = document.getElementById('tally-overlay');
       const text = document.getElementById('tally-winner-text');
       text.innerText = `⚡ ${data.winnerName} WAS THE FASTEST! ⚡ (+200 pts banked!)`;
       overlay.style.display = 'flex';
-    });
-
-    socket.on('dramaticBust', (data) => {
-      const overlay = document.getElementById('bust-overlay');
-      const text = document.getElementById('bust-text');
-      text.innerText = data.reason || 'Round Score Lost!';
-      overlay.style.display = 'flex';
+      setTimeout(() => { overlay.style.display = 'none'; }, 2500);
     });
 
     socket.on('triggerRollAnimation', (data) => {
