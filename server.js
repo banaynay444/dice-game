@@ -322,7 +322,7 @@ function handleBust(reason) {
   // 2. Wait 800ms so players see the landed dice faces, THEN trigger full-screen bust overlay!
   setTimeout(() => {
     io.emit('dramaticBust', { reason });
-  }, 800);
+  }, 600);
 
   // 3. Complete round after overlay finishes displaying (2.5s)
   setTimeout(() => {
