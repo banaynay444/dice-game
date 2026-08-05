@@ -81,13 +81,17 @@ io.on('connection', (socket) => {
     io.emit('stateUpdate', gameState);
   });
 
+  // Request Roll Base 3 Dice (broadcasts animation to all players)
   socket.on('selectDice', (chosenColors) => {
     const player = gameState.players[gameState.currentPlayerIndex];
     if (socket.id !== player.id || gameState.phase !== 'SELECT_DICE') return;
 
     if (chosenColors.length === 3) {
       gameState.selectedDice = chosenColors;
-      startRollSession();
+      io.emit('triggerRollAnimation', { mode: 'NEW', colors: chosenColors });
+      setTimeout(() => {
+        startRollSession();
+      }, 650);
     }
   });
 
@@ -112,49 +116,48 @@ io.on('connection', (socket) => {
     }
   });
 
-  // FIXED: White Up-Die "x2" now doubles the ENTIRE running round score pool!
   socket.on('rollWhiteDie', () => {
     const player = gameState.players[gameState.currentPlayerIndex];
     if (socket.id !== player.id || gameState.phase !== 'ROLL_WHITE_DIE') return;
 
-    const seventhFace = rollDice('seventh');
-    gameState.lastRoll.seventh = seventhFace;
+    io.emit('triggerRollAnimation', { mode: 'APPEND', colors: ['seventh'] });
+    
+    setTimeout(() => {
+      const seventhFace = rollDice('seventh');
+      gameState.lastRoll.seventh = seventhFace;
 
-    let currentRollSum = gameState.lastRoll.results.reduce((acc, r) => acc + parseFace(r.face).val, 0);
+      let currentRollSum = gameState.lastRoll.results.reduce((acc, r) => acc + parseFace(r.face).val, 0);
 
-    if (seventhFace === "+100") {
-      applyRollPoints(currentRollSum + 100);
-    } else if (seventhFace === "-100") {
-      applyRollPoints(currentRollSum - 100);
-    } else if (seventhFace === "x2") {
-      // Add current roll points first, then double the entire running total!
-      let totalBeforeDouble = gameState.roundScore + currentRollSum;
-      let doubledTotal = totalBeforeDouble * 2;
-      
-      gameState.roundScore = doubledTotal;
-      gameState.players.forEach(p => {
-        if (p.status === 'IN') {
-          p.roundScore = doubledTotal;
-        }
-      });
-      openDecisionMoment();
-    } else if (["+1", "+2"].includes(seventhFace)) {
-      // Add roll points for the circled roll before picking extra dice
-      gameState.roundScore += currentRollSum;
-      gameState.players.forEach(p => {
-        if (p.status === 'IN') p.roundScore += currentRollSum;
-      });
-      gameState.pendingExtraDiceCount = parseInt(seventhFace.replace("+", ""), 10);
-      gameState.phase = 'EXTRA_DICE_CHOICE';
-      io.emit('stateUpdate', gameState);
-    } else if (seventhFace === "+3") {
-      gameState.roundScore += currentRollSum;
-      gameState.players.forEach(p => {
-        if (p.status === 'IN') p.roundScore += currentRollSum;
-      });
-      gameState.phase = 'ROLL_PLUS_THREE';
-      io.emit('stateUpdate', gameState);
-    }
+      if (seventhFace === "+100") {
+        applyRollPoints(currentRollSum + 100);
+      } else if (seventhFace === "-100") {
+        applyRollPoints(currentRollSum - 100);
+      } else if (seventhFace === "x2") {
+        let totalBeforeDouble = gameState.roundScore + currentRollSum;
+        let doubledTotal = totalBeforeDouble * 2;
+        
+        gameState.roundScore = doubledTotal;
+        gameState.players.forEach(p => {
+          if (p.status === 'IN') p.roundScore = doubledTotal;
+        });
+        openDecisionMoment();
+      } else if (["+1", "+2"].includes(seventhFace)) {
+        gameState.roundScore += currentRollSum;
+        gameState.players.forEach(p => {
+          if (p.status === 'IN') p.roundScore += currentRollSum;
+        });
+        gameState.pendingExtraDiceCount = parseInt(seventhFace.replace("+", ""), 10);
+        gameState.phase = 'EXTRA_DICE_CHOICE';
+        io.emit('stateUpdate', gameState);
+      } else if (seventhFace === "+3") {
+        gameState.roundScore += currentRollSum;
+        gameState.players.forEach(p => {
+          if (p.status === 'IN') p.roundScore += currentRollSum;
+        });
+        gameState.phase = 'ROLL_PLUS_THREE';
+        io.emit('stateUpdate', gameState);
+      }
+    }, 650);
   });
 
   socket.on('selectExtraDice', (extraColors) => {
@@ -162,7 +165,10 @@ io.on('connection', (socket) => {
     if (socket.id !== player.id || gameState.phase !== 'EXTRA_DICE_CHOICE') return;
 
     if (extraColors.length === gameState.pendingExtraDiceCount) {
-      resolveExtraRolls(extraColors);
+      io.emit('triggerRollAnimation', { mode: 'APPEND', colors: extraColors });
+      setTimeout(() => {
+        resolveExtraRolls(extraColors);
+      }, 650);
     }
   });
 
@@ -171,7 +177,11 @@ io.on('connection', (socket) => {
     if (socket.id !== player.id || gameState.phase !== 'ROLL_PLUS_THREE') return;
 
     const unchosen = Object.keys(DICE).filter(c => c !== 'seventh' && !gameState.selectedDice.includes(c));
-    resolveExtraRolls(unchosen);
+    io.emit('triggerRollAnimation', { mode: 'APPEND', colors: unchosen });
+    
+    setTimeout(() => {
+      resolveExtraRolls(unchosen);
+    }, 650);
   });
 
   socket.on('rollAgain', () => {
@@ -181,7 +191,10 @@ io.on('connection', (socket) => {
     const pendingInPlayers = gameState.players.filter(p => p.status === 'IN' && !p.madeDecision);
     if (pendingInPlayers.length > 0) return;
 
-    startRollSession();
+    io.emit('triggerRollAnimation', { mode: 'NEW', colors: gameState.selectedDice });
+    setTimeout(() => {
+      startRollSession();
+    }, 650);
   });
 
   socket.on('startNextRound', () => {
@@ -304,7 +317,13 @@ function handleBust(reason) {
   });
 
   gameState.bannerMessage = { type: 'bust', text: reason };
-  endRound(reason);
+
+  // Trigger Fullscreen Dramatic Red Bust Overlay on all screens!
+  io.emit('dramaticBust', { reason });
+
+  setTimeout(() => {
+    endRound(reason);
+  }, 2500);
 }
 
 function endRound(reason) {

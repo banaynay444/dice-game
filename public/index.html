@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <title>Tally-Up!</title>
-  <!-- Google Font: Nunito (Soft & easy on the eyes) -->
+  <!-- Google Font: Nunito -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@600;800;900&display=swap" rel="stylesheet">
@@ -67,7 +67,6 @@
 
     .dice-picker { display: flex; gap: 12px; flex-wrap: wrap; }
     
-    /* Selecting Buttons with Clean High Contrast */
     .dice-btn { 
       padding: 10px 24px; 
       border: 3px solid var(--border-color); 
@@ -82,7 +81,6 @@
     .dice-btn:active { transform: translateY(2px); box-shadow: 0 2px 0 var(--border-color); }
     .dice-btn.selected { border-color: #ffffff; box-shadow: 0 0 0 3.5px var(--border-color); transform: scale(1.06); }
     
-    /* ORIGINAL DICE COLOR PALETTE RESTORED */
     .red { background: #ff4757; color: #ffffff; } 
     .orange { background: #ffa502; color: #1a1a1a; } 
     .yellow { background: #eccc68; color: #1a1a1a !important; }
@@ -146,23 +144,24 @@
       to { transform: translateY(0); opacity: 1; }
     }
 
-    /* Fullscreen Tally-Up Overlay */
-    #tally-overlay {
+    /* Fullscreen Tally-Up & Bust Overlays */
+    #tally-overlay, #bust-overlay {
       position: fixed;
       top: 0; left: 0; width: 100vw; height: 100vh;
-      background: rgba(46, 213, 115, 0.95);
       z-index: 9999;
       display: flex;
       flex-direction: column;
       align-items: center;
       justify-content: center;
-      color: #1a1a1a;
       text-align: center;
       animation: zoomIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
     }
 
-    #tally-overlay h1 { font-size: 70px; margin: 0; letter-spacing: 2px; }
-    #tally-overlay p { font-size: 26px; margin-top: 15px; font-weight: 800; }
+    #tally-overlay { background: rgba(46, 213, 115, 0.95); color: #1a1a1a; }
+    #bust-overlay { background: rgba(255, 71, 87, 0.96); color: #ffffff; }
+
+    #tally-overlay h1, #bust-overlay h1 { font-size: 75px; margin: 0; letter-spacing: 2px; }
+    #tally-overlay p, #bust-overlay p { font-size: 26px; margin-top: 15px; font-weight: 800; }
 
     @keyframes zoomIn {
       from { transform: scale(0.5); opacity: 0; }
@@ -215,7 +214,6 @@
       padding: 18px; border-radius: 14px; margin-top: 15px; 
     }
 
-    /* Strategy Card with Soft Pastel Yellow Background */
     .reference-card {
       background: #fff3a0;
       border: 3px solid var(--border-color);
@@ -246,10 +244,15 @@
 </head>
 <body>
 
-  <!-- Fullscreen Dramatic Tally-Up Animation -->
+  <!-- Fullscreen Dramatic Overlays -->
   <div id="tally-overlay" style="display:none;">
     <h1>⚡ TALLY-UP! ⚡</h1>
     <p id="tally-winner-text">Someone was the fastest!</p>
+  </div>
+
+  <div id="bust-overlay" style="display:none;">
+    <h1>💥 BUST! 💥</h1>
+    <p id="bust-text">Round Score Lost!</p>
   </div>
 
   <div class="container">
@@ -275,6 +278,11 @@
         <div class="roll-area">
           <h2 id="turn-indicator">Waiting...</h2>
           
+          <!-- Passive Waiting Message for non-active players -->
+          <div id="waiting-status-box" class="action-step-card" style="display:none; background:var(--arena-bg);">
+            <p id="waiting-status-text" style="font-weight:800; margin:0;">Waiting for active player...</p>
+          </div>
+
           <!-- Step 1: Dice Pick -->
           <div id="dice-select-section">
             <p style="font-weight:700;">Pick 3 dice for your roll:</p>
@@ -364,7 +372,7 @@
           <p><strong>Round Score Pool:</strong> <span id="round-score">0</span></p>
           <ul id="player-list"></ul>
 
-          <!-- Official Dice Reference Card with Pastel Yellow Background -->
+          <!-- Official Dice Reference Card -->
           <div class="reference-card">
             <div class="ref-header">3 ★ IS A <span style="color:#2ed573;">TALLY UP!</span></div>
             
@@ -439,7 +447,6 @@
     let myId = null;
     let selectedColors = [];
     let extraSelectedColors = [];
-    let isRollingAnimation = false;
 
     socket.on('connect', () => { myId = socket.id; });
 
@@ -450,16 +457,36 @@
       }
     });
 
+    // Dramatic Tally-Up Fullscreen Listener
     socket.on('dramaticTallyUp', (data) => {
       const overlay = document.getElementById('tally-overlay');
       const text = document.getElementById('tally-winner-text');
-      
       text.innerText = `⚡ ${data.winnerName} WAS THE FASTEST! ⚡ (+200 pts banked!)`;
       overlay.style.display = 'flex';
+      setTimeout(() => { overlay.style.display = 'none'; }, 2500);
+    });
 
-      setTimeout(() => {
-        overlay.style.display = 'none';
-      }, 2500);
+    // Dramatic Red Bust Fullscreen Listener
+    socket.on('dramaticBust', (data) => {
+      const overlay = document.getElementById('bust-overlay');
+      const text = document.getElementById('bust-text');
+      text.innerText = data.reason || 'Round Score Lost!';
+      overlay.style.display = 'flex';
+      setTimeout(() => { overlay.style.display = 'none'; }, 2500);
+    });
+
+    // Synchronized Global Rolling Animation Listener for ALL Players
+    socket.on('triggerRollAnimation', (data) => {
+      const display = document.getElementById('dice-results');
+      if (data.mode === 'NEW') {
+        display.innerHTML = '';
+      }
+      data.colors.forEach(color => {
+        const d = document.createElement('div');
+        d.className = `die-face ${color} rolling`;
+        d.innerText = '?';
+        display.appendChild(d);
+      });
     });
 
     function toggleTheme() {
@@ -505,80 +532,28 @@
     }
 
     function confirmDice() {
-      animateNewDice(selectedColors, () => socket.emit('selectDice', selectedColors));
+      socket.emit('selectDice', selectedColors);
     }
 
     function rollWhiteDieAnimated() {
-      appendTumblingDie('seventh', () => socket.emit('rollWhiteDie'));
+      socket.emit('rollWhiteDie');
     }
 
     function confirmExtraDice() {
-      appendMultipleTumblingDice(extraSelectedColors, () => {
-        socket.emit('selectExtraDice', extraSelectedColors);
-        extraSelectedColors = [];
-      });
+      socket.emit('selectExtraDice', extraSelectedColors);
+      extraSelectedColors = [];
     }
 
     function rollPlusThreeAnimated() {
-      appendMultipleTumblingDice(['green', 'blue', 'pink'], () => socket.emit('rollPlusThree'));
+      socket.emit('rollPlusThree');
     }
 
     function triggerRollWithAnimation() {
-      animateNewDice(selectedColors, () => socket.emit('rollAgain'));
+      socket.emit('rollAgain');
     }
 
     function startNextRound() {
       socket.emit('startNextRound');
-    }
-
-    function animateNewDice(colorsToAnimate, emitCallback) {
-      isRollingAnimation = true;
-      const display = document.getElementById('dice-results');
-      display.innerHTML = '';
-      
-      colorsToAnimate.forEach(color => {
-        const d = document.createElement('div');
-        d.className = `die-face ${color} rolling`;
-        d.innerText = '?';
-        display.appendChild(d);
-      });
-
-      setTimeout(() => {
-        isRollingAnimation = false;
-        emitCallback();
-      }, 650);
-    }
-
-    function appendTumblingDie(color, emitCallback) {
-      isRollingAnimation = true;
-      const display = document.getElementById('dice-results');
-      
-      const d = document.createElement('div');
-      d.className = `die-face ${color} rolling`;
-      d.innerText = '?';
-      display.appendChild(d);
-
-      setTimeout(() => {
-        isRollingAnimation = false;
-        emitCallback();
-      }, 650);
-    }
-
-    function appendMultipleTumblingDice(colors, emitCallback) {
-      isRollingAnimation = true;
-      const display = document.getElementById('dice-results');
-      
-      colors.forEach(color => {
-        const d = document.createElement('div');
-        d.className = `die-face ${color} rolling`;
-        d.innerText = '?';
-        display.appendChild(d);
-      });
-
-      setTimeout(() => {
-        isRollingAnimation = false;
-        emitCallback();
-      }, 650);
     }
 
     function makeDecision(choice) {
@@ -586,8 +561,6 @@
     }
 
     socket.on('stateUpdate', (state) => {
-      if (isRollingAnimation) return;
-
       const activePlayer = state.players[state.currentPlayerIndex];
       const isMyTurn = activePlayer && activePlayer.id === myId;
       const me = state.players.find(p => p.id === myId);
@@ -633,6 +606,25 @@
         `;
         list.appendChild(li);
       });
+
+      // Passive Waiting Status Message for Non-Rolling Players
+      const waitingBox = document.getElementById('waiting-status-box');
+      const waitingText = document.getElementById('waiting-status-text');
+
+      if (!isMyTurn && activePlayer && ['SELECT_DICE', 'ROLL_WHITE_DIE', 'EXTRA_DICE_CHOICE', 'ROLL_PLUS_THREE'].includes(state.phase)) {
+        waitingBox.style.display = 'block';
+        if (state.phase === 'SELECT_DICE') {
+          waitingText.innerText = `🤔 ${activePlayer.name} is choosing 3 dice...`;
+        } else if (state.phase === 'ROLL_WHITE_DIE') {
+          waitingText.innerText = `⭕ ${activePlayer.name} is rolling the White Up-Die...`;
+        } else if (state.phase === 'EXTRA_DICE_CHOICE') {
+          waitingText.innerText = `🎲 ${activePlayer.name} is choosing extra dice...`;
+        } else if (state.phase === 'ROLL_PLUS_THREE') {
+          waitingText.innerText = `➕ ${activePlayer.name} is rolling 3 extra dice...`;
+        }
+      } else {
+        waitingBox.style.display = 'none';
+      }
 
       // Section Visibilities
       document.getElementById('dice-select-section').style.display = 
