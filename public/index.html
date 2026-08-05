@@ -144,7 +144,7 @@
       to { transform: translateY(0); opacity: 1; }
     }
 
-    /* Fullscreen Tally-Up & Bust Overlays */
+    /* Fullscreen Overlays */
     #tally-overlay, #bust-overlay {
       position: fixed;
       top: 0; left: 0; width: 100vw; height: 100vh;
@@ -244,7 +244,7 @@
 </head>
 <body>
 
-  <!-- Fullscreen Dramatic Overlays -->
+  <!-- Fullscreen Overlays -->
   <div id="tally-overlay" style="display:none;">
     <h1>⚡ TALLY-UP! ⚡</h1>
     <p id="tally-winner-text">Someone was the fastest!</p>
@@ -278,7 +278,7 @@
         <div class="roll-area">
           <h2 id="turn-indicator">Waiting...</h2>
           
-          <!-- Passive Waiting Message for non-active players -->
+          <!-- Passive Waiting Box -->
           <div id="waiting-status-box" class="action-step-card" style="display:none; background:var(--arena-bg);">
             <p id="waiting-status-text" style="font-weight:800; margin:0;">Waiting for active player...</p>
           </div>
@@ -366,7 +366,7 @@
 
         </div>
 
-        <!-- Sidebar: Scoreboard + Strategy Reference Card -->
+        <!-- Sidebar -->
         <div class="sidebar">
           <h3>Scoreboard</h3>
           <p><strong>Round Score Pool:</strong> <span id="round-score">0</span></p>
@@ -457,7 +457,6 @@
       }
     });
 
-    // Dramatic Tally-Up Fullscreen Listener
     socket.on('dramaticTallyUp', (data) => {
       const overlay = document.getElementById('tally-overlay');
       const text = document.getElementById('tally-winner-text');
@@ -466,7 +465,6 @@
       setTimeout(() => { overlay.style.display = 'none'; }, 2500);
     });
 
-    // Dramatic Red Bust Fullscreen Listener
     socket.on('dramaticBust', (data) => {
       const overlay = document.getElementById('bust-overlay');
       const text = document.getElementById('bust-text');
@@ -475,7 +473,6 @@
       setTimeout(() => { overlay.style.display = 'none'; }, 2500);
     });
 
-    // Synchronized Global Rolling Animation Listener for ALL Players
     socket.on('triggerRollAnimation', (data) => {
       const display = document.getElementById('dice-results');
       if (data.mode === 'NEW') {
@@ -607,7 +604,7 @@
         list.appendChild(li);
       });
 
-      // Passive Waiting Status Message for Non-Rolling Players
+      // Passive Waiting Box
       const waitingBox = document.getElementById('waiting-status-box');
       const waitingText = document.getElementById('waiting-status-text');
 

@@ -81,7 +81,6 @@ io.on('connection', (socket) => {
     io.emit('stateUpdate', gameState);
   });
 
-  // Request Roll Base 3 Dice (broadcasts animation to all players)
   socket.on('selectDice', (chosenColors) => {
     const player = gameState.players[gameState.currentPlayerIndex];
     if (socket.id !== player.id || gameState.phase !== 'SELECT_DICE') return;
@@ -95,7 +94,6 @@ io.on('connection', (socket) => {
     }
   });
 
-  // Spacebar Reaction Event for Tally-Up!
   socket.on('claimTallyUp', () => {
     if (gameState.phase === 'TALLY_UP_RACE' && !gameState.tallyClaimed) {
       gameState.tallyClaimed = true;
@@ -318,12 +316,18 @@ function handleBust(reason) {
 
   gameState.bannerMessage = { type: 'bust', text: reason };
 
-  // Trigger Fullscreen Dramatic Red Bust Overlay on all screens!
-  io.emit('dramaticBust', { reason });
+  // 1. Emit state first so dice faces render on screen
+  io.emit('stateUpdate', gameState);
 
+  // 2. Wait 800ms so players see the landed dice faces, THEN trigger full-screen bust overlay!
+  setTimeout(() => {
+    io.emit('dramaticBust', { reason });
+  }, 800);
+
+  // 3. Complete round after overlay finishes displaying (2.5s)
   setTimeout(() => {
     endRound(reason);
-  }, 2500);
+  }, 3300);
 }
 
 function endRound(reason) {
